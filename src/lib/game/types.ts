@@ -11,11 +11,19 @@ export interface Player extends Entity {
   isGrounded: boolean;
 }
 
+export interface Enemy extends Entity {
+  type: 'patrol' | 'spike';
+  range?: number;
+  speed?: number;
+  startPos?: Vector2;
+}
+
 export interface Level {
   id: number;
   width: number;
   platforms: Entity[];
   obstacles: Entity[];
+  enemies: Enemy[];
   collectibles: Entity[];
   goal: Entity;
 }

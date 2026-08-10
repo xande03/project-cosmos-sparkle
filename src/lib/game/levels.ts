@@ -28,6 +28,11 @@ export const level1: Level = {
     { id: 'o3', position: { x: 1600, y: 520 }, size: { x: 40, y: 30 } },
     { id: 'o4', position: { x: 2300, y: 520 }, size: { x: 30, y: 30 } },
   ],
+  enemies: [
+    { id: 'e1', type: 'patrol', position: { x: 400, y: 510 }, size: { x: 40, y: 40 }, range: 200, speed: 100, startPos: { x: 400, y: 510 } },
+    { id: 'e2', type: 'patrol', position: { x: 1200, y: 510 }, size: { x: 40, y: 40 }, range: 300, speed: 150, startPos: { x: 1200, y: 510 } },
+    { id: 'e3', type: 'patrol', position: { x: 2500, y: 510 }, size: { x: 40, y: 40 }, range: 250, speed: 120, startPos: { x: 2500, y: 510 } },
+  ],
   collectibles: [
     { id: 'c1', position: { x: 375, y: 380 }, size: { x: 30, y: 30 } },
     { id: 'c2', position: { x: 625, y: 280 }, size: { x: 30, y: 30 } },
