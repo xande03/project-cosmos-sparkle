@@ -1,20 +1,37 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useGameLoop } from '@/hooks/useGameLoop';
 import { level1 } from '@/lib/game/levels';
+import { Heart, Trophy, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const GRAVITY = 1500;
 const JUMP_FORCE = -700;
 const MOVE_SPEED = 300;
 const FRICTION = 0.8;
+const MAX_HEALTH = 3;
 
 export default function GameContainer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [player, setPlayer] = useState({ x: 100, y: 400, vx: 0, vy: 0, width: 40, height: 40, isGrounded: false });
+  
+  const [gameState, setGameState] = useState<'playing' | 'gameover' | 'victory'>('playing');
+  const [player, setPlayer] = useState({ x: 100, y: 400, vx: 0, vy: 0, width: 40, height: 40, isGrounded: false, health: MAX_HEALTH, invulnerable: 0 });
   const [cameraX, setCameraX] = useState(0);
   const [score, setScore] = useState(0);
   const [collectibles, setCollectibles] = useState(level1.collectibles.map(c => ({ ...c, active: true })));
+  const [enemies, setEnemies] = useState(level1.enemies.map(e => ({ ...e })));
+  const [achievements, setAchievements] = useState<string[]>([]);
+  
   const keys = useRef<{ [key: string]: boolean }>({});
+
+  const resetGame = () => {
+    setPlayer({ x: 100, y: 400, vx: 0, vy: 0, width: 40, height: 40, isGrounded: false, health: MAX_HEALTH, invulnerable: 0 });
+    setScore(0);
+    setCollectibles(level1.collectibles.map(c => ({ ...c, active: true })));
+    setEnemies(level1.enemies.map(e => ({ ...e })));
+    setGameState('playing');
+    setCameraX(0);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => keys.current[e.code] = true;
@@ -27,10 +44,19 @@ export default function GameContainer() {
     };
   }, []);
 
+  const addAchievement = (text: string) => {
+    if (!achievements.includes(text)) {
+      setAchievements(prev => [...prev, text]);
+    }
+  };
+
   const update = useCallback((deltaTime: number) => {
+    if (gameState !== 'playing') return;
+
     setPlayer(prev => {
       let newVx = prev.vx;
       let newVy = prev.vy + GRAVITY * deltaTime;
+      let newInvulnerable = Math.max(0, prev.invulnerable - deltaTime);
 
       if (keys.current['ArrowLeft'] || keys.current['KeyA']) newVx = -MOVE_SPEED;
       else if (keys.current['ArrowRight'] || keys.current['KeyD']) newVx = MOVE_SPEED;
@@ -43,8 +69,9 @@ export default function GameContainer() {
       let newX = prev.x + newVx * deltaTime;
       let newY = prev.y + newVy * deltaTime;
       let isGrounded = false;
+      let newHealth = prev.health;
 
-      // Basic Collision with platforms
+      // Platform Collisions
       level1.platforms.forEach(p => {
         if (
           newX < p.position.x + p.size.x &&
@@ -52,19 +79,14 @@ export default function GameContainer() {
           newY < p.position.y + p.size.y &&
           newY + prev.height > p.position.y
         ) {
-          // Collision from top
           if (prev.y + prev.height <= p.position.y) {
             newY = p.position.y - prev.height;
             newVy = 0;
             isGrounded = true;
-          } 
-          // Collision from bottom
-          else if (prev.y >= p.position.y + p.size.y) {
+          } else if (prev.y >= p.position.y + p.size.y) {
             newY = p.position.y + p.size.y;
             newVy = 0;
-          }
-          // Horizontal collisions
-          else if (prev.x + prev.width <= p.position.x) {
+          } else if (prev.x + prev.width <= p.position.x) {
             newX = p.position.x - prev.width;
             newVx = 0;
           } else if (prev.x >= p.position.x + p.size.x) {
@@ -74,16 +96,60 @@ export default function GameContainer() {
         }
       });
 
+      // Obstacle & Enemy Collisions
+      if (newInvulnerable === 0) {
+        let hit = false;
+        
+        // Static Obstacles
+        level1.obstacles.forEach(o => {
+          if (newX < o.position.x + o.size.x && newX + prev.width > o.position.x && newY < o.position.y + o.size.y && newY + prev.height > o.position.y) {
+            hit = true;
+          }
+        });
+
+        // Dynamic Enemies
+        enemies.forEach(e => {
+          if (newX < e.position.x + e.size.x && newX + prev.width > e.position.x && newY < e.position.y + e.size.y && newY + prev.height > e.position.y) {
+            hit = true;
+          }
+        });
+
+        if (hit) {
+          newHealth -= 1;
+          newInvulnerable = 1.5; // 1.5 seconds of invulnerability
+          if (newHealth <= 0) {
+            setGameState('gameover');
+          }
+        }
+      }
+
+      // Goal Collision
+      if (newX < level1.goal.position.x + level1.goal.size.x && newX + prev.width > level1.goal.position.x && newY < level1.goal.position.y + level1.goal.size.y && newY + prev.height > level1.goal.position.y) {
+        setGameState('victory');
+        addAchievement("Jungle Explorer");
+      }
+
       // Death by falling
       if (newY > 700) {
+        newHealth -= 1;
         newX = 100;
         newY = 400;
         newVx = 0;
         newVy = 0;
+        if (newHealth <= 0) setGameState('gameover');
       }
 
-      return { ...prev, x: newX, y: newY, vx: newVx, vy: newVy, isGrounded };
+      return { ...prev, x: newX, y: newY, vx: newVx, vy: newVy, isGrounded, health: newHealth, invulnerable: newInvulnerable };
     });
+
+    // Update Enemies
+    setEnemies(prev => prev.map(e => {
+      if (e.type === 'patrol' && e.startPos && e.range && e.speed) {
+        const offset = Math.sin(Date.now() / 1000 * (e.speed / 100)) * (e.range / 2);
+        return { ...e, position: { ...e.position, x: e.startPos.x + offset } };
+      }
+      return e;
+    }));
 
     // Camera follow
     setCameraX(prev => {
@@ -92,19 +158,28 @@ export default function GameContainer() {
     });
 
     // Collectibles
-    setCollectibles(prev => prev.map(c => {
-      if (c.active && 
-          player.x < c.position.x + c.size.x &&
-          player.x + player.width > c.position.x &&
-          player.y < c.position.y + c.size.y &&
-          player.y + player.height > c.position.y) {
-        setScore(s => s + 100);
-        return { ...c, active: false };
-      }
-      return c;
-    }));
+    setCollectibles(prev => {
+      let collectedAny = false;
+      const next = prev.map(c => {
+        if (c.active && 
+            player.x < c.position.x + c.size.x &&
+            player.x + player.width > c.position.x &&
+            player.y < c.position.y + c.size.y &&
+            player.y + player.height > c.position.y) {
+          setScore(s => s + 100);
+          collectedAny = true;
+          return { ...c, active: false };
+        }
+        return c;
+      });
+      
+      const allCollected = next.every(c => !c.active);
+      if (allCollected) addAchievement("Banana King");
+      
+      return next;
+    });
 
-  }, [player.x, player.y, player.width, player.height]);
+  }, [player, gameState, enemies, achievements]);
 
   useGameLoop((deltaTime) => {
     update(deltaTime);
@@ -119,26 +194,43 @@ export default function GameContainer() {
     ctx.save();
     ctx.translate(-cameraX, 0);
 
-    // Draw background elements (Modern Vector feel)
-    ctx.fillStyle = '#BAE6FD'; // Light sky
+    // Sky
+    ctx.fillStyle = '#BAE6FD';
     ctx.fillRect(cameraX, 0, canvas.width, canvas.height);
 
-    // Draw Platforms
-    ctx.fillStyle = '#65A30D'; // Grass green
+    // Platforms
+    ctx.fillStyle = '#65A30D';
     level1.platforms.forEach(p => {
       ctx.beginPath();
       ctx.roundRect(p.position.x, p.position.y, p.size.x, p.size.y, 8);
       ctx.fill();
     });
 
-    // Draw Obstacles
-    ctx.fillStyle = '#EF4444'; // Red danger
+    // Obstacles (Spikes)
+    ctx.fillStyle = '#EF4444';
     level1.obstacles.forEach(o => {
-      ctx.fillRect(o.position.x, o.position.y, o.size.x, o.size.y);
+      ctx.beginPath();
+      ctx.moveTo(o.position.x, o.position.y + o.size.y);
+      ctx.lineTo(o.position.x + o.size.x / 2, o.position.y);
+      ctx.lineTo(o.position.x + o.size.x, o.position.y + o.size.y);
+      ctx.fill();
     });
 
-    // Draw Collectibles (Bananas for the monkey!)
-    ctx.fillStyle = '#FACC15'; // Yellow
+    // Enemies (Crabs/Monsters)
+    ctx.fillStyle = '#991B1B';
+    enemies.forEach(e => {
+      ctx.beginPath();
+      ctx.roundRect(e.position.x, e.position.y, e.size.x, e.size.y, 4);
+      ctx.fill();
+      // Eyes
+      ctx.fillStyle = 'white';
+      ctx.fillRect(e.position.x + 5, e.position.y + 5, 5, 5);
+      ctx.fillRect(e.position.x + e.size.x - 10, e.position.y + 5, 5, 5);
+      ctx.fillStyle = '#991B1B';
+    });
+
+    // Collectibles
+    ctx.fillStyle = '#FACC15';
     collectibles.forEach(c => {
       if (c.active) {
         ctx.beginPath();
@@ -147,42 +239,94 @@ export default function GameContainer() {
       }
     });
 
-    // Draw Goal
-    ctx.fillStyle = '#8B5CF6'; // Purple goal
+    // Goal
+    ctx.fillStyle = '#8B5CF6';
     ctx.fillRect(level1.goal.position.x, level1.goal.position.y, level1.goal.size.x, level1.goal.size.y);
 
-    // Draw Player (Monkey Long)
-    // Simple modern vector monkey representation
-    ctx.fillStyle = '#78350F'; // Dark brown body
-    ctx.beginPath();
-    ctx.roundRect(player.x, player.y, player.width, player.height, 10);
-    ctx.fill();
-    // Face
-    ctx.fillStyle = '#FDE68A';
-    ctx.beginPath();
-    ctx.arc(player.x + player.width/2, player.y + 15, 12, 0, Math.PI * 2);
-    ctx.fill();
-    // Ears
-    ctx.fillStyle = '#78350F';
-    ctx.beginPath();
-    ctx.arc(player.x, player.y + 15, 6, 0, Math.PI * 2);
-    ctx.arc(player.x + player.width, player.y + 15, 6, 0, Math.PI * 2);
-    ctx.fill();
+    // Player
+    if (player.invulnerable <= 0 || Math.floor(Date.now() / 100) % 2 === 0) {
+      ctx.fillStyle = '#78350F';
+      ctx.beginPath();
+      ctx.roundRect(player.x, player.y, player.width, player.height, 10);
+      ctx.fill();
+      ctx.fillStyle = '#FDE68A';
+      ctx.beginPath();
+      ctx.arc(player.x + player.width/2, player.y + 15, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#78350F';
+      ctx.beginPath();
+      ctx.arc(player.x, player.y + 15, 6, 0, Math.PI * 2);
+      ctx.arc(player.x + player.width, player.y + 15, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.restore();
   });
 
   return (
-    <div className="relative" ref={containerRef}>
-      <div className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg font-bold shadow-sm">
-        Score: {score}
+    <div className="relative flex flex-col items-center gap-4" ref={containerRef}>
+      {/* HUD */}
+      <div className="w-full flex justify-between items-center bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-stone-200">
+        <div className="flex items-center gap-4">
+          <div className="flex gap-1">
+            {[...Array(MAX_HEALTH)].map((_, i) => (
+              <Heart key={i} className={`w-6 h-6 ${i < player.health ? 'fill-red-500 text-red-500' : 'text-stone-300'}`} />
+            ))}
+          </div>
+          <div className="h-8 w-px bg-stone-200" />
+          <div className="text-xl font-bold text-stone-700 flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-yellow-500" />
+            {score.toLocaleString()}
+          </div>
+        </div>
+        
+        <div className="flex gap-2">
+          {achievements.map((a, i) => (
+            <span key={i} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium border border-purple-200">
+              {a}
+            </span>
+          ))}
+        </div>
       </div>
-      <canvas 
-        ref={canvasRef} 
-        width={800} 
-        height={600} 
-        className="rounded-xl shadow-2xl border-4 border-stone-800"
-      />
+
+      <div className="relative overflow-hidden rounded-2xl shadow-2xl border-8 border-stone-800 bg-stone-900">
+        <canvas 
+          ref={canvasRef} 
+          width={800} 
+          height={600} 
+          className="block"
+        />
+
+        {/* Game Over Screen */}
+        {gameState === 'gameover' && (
+          <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm flex flex-col items-center justify-center text-white p-8">
+            <h2 className="text-6xl font-black mb-2 text-red-500 italic uppercase">Game Over</h2>
+            <p className="text-xl text-stone-300 mb-8 font-medium">Try again, Monkey Long!</p>
+            <div className="bg-white/10 p-6 rounded-2xl mb-8 w-64 text-center">
+              <div className="text-stone-400 text-sm uppercase tracking-widest mb-1">Final Score</div>
+              <div className="text-4xl font-bold">{score}</div>
+            </div>
+            <Button onClick={resetGame} size="lg" className="bg-red-600 hover:bg-red-700 text-white gap-2 text-lg px-8 py-6 rounded-xl">
+              <RefreshCw className="w-6 h-6" /> Restart
+            </Button>
+          </div>
+        )}
+
+        {/* Victory Screen */}
+        {gameState === 'victory' && (
+          <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm flex flex-col items-center justify-center text-white p-8">
+            <h2 className="text-6xl font-black mb-2 text-yellow-400 italic uppercase">Victory!</h2>
+            <p className="text-xl text-stone-300 mb-8 font-medium">You reached the golden jungle!</p>
+            <div className="bg-white/10 p-6 rounded-2xl mb-8 w-64 text-center">
+              <div className="text-stone-400 text-sm uppercase tracking-widest mb-1">Final Score</div>
+              <div className="text-4xl font-bold">{score}</div>
+            </div>
+            <Button onClick={resetGame} size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black gap-2 text-lg px-8 py-6 rounded-xl font-bold">
+              <RefreshCw className="w-6 h-6" /> Play Again
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
