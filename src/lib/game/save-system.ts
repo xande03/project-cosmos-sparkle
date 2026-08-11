@@ -49,6 +49,10 @@ export const saveSystem = {
     return newSave;
   },
 
+  autoSave: (data: Partial<GameSave>) => {
+    return saveSystem.saveGame('autosave', 'Auto Save', data);
+  },
+
   deleteSave: (slotId: string) => {
     const saves = saveSystem.getSaves().filter(s => s.id !== slotId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saves));

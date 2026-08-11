@@ -4,7 +4,8 @@ import { level1 } from '@/lib/game/levels';
 import { Heart, Trophy, RefreshCw, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SaveManager from './save-management/SaveManager';
-import { GameSave } from '@/lib/game/save-system';
+import { GameSave, saveSystem } from '@/lib/game/save-system';
+import { toast } from 'sonner';
 
 
 const GRAVITY = 1500;
@@ -29,7 +30,9 @@ export default function GameContainer() {
   const [achievements, setAchievements] = useState<string[]>([]);
   const [showSaveManager, setShowSaveManager] = useState(false);
 
-  
+  const [lastAutoSaveTime, setLastAutoSaveTime] = useState(Date.now());
+  const AUTOSAVE_INTERVAL = 60000; // 60 seconds
+
   const keys = useRef<{ [key: string]: boolean }>({});
 
   // Load saved data on mount
@@ -75,11 +78,35 @@ export default function GameContainer() {
       if (!prev.includes(text)) {
         const next = [...prev, text];
         localStorage.setItem(STORAGE_KEY_ACHIEVEMENTS, JSON.stringify(next));
+        toast.success(`Conquista: ${text}`);
         return next;
       }
       return prev;
     });
   };
+
+  const performAutoSave = useCallback(() => {
+    saveSystem.autoSave({
+      score,
+      highScore,
+      achievements,
+      health: player.health,
+      currentLevel: 'Level 1'
+    });
+    setLastAutoSaveTime(Date.now());
+    toast.info("Jogo salvo automaticamente", { duration: 2000 });
+  }, [score, highScore, achievements, player.health]);
+
+  // Periodic AutoSave
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    
+    const timer = setInterval(() => {
+      performAutoSave();
+    }, AUTOSAVE_INTERVAL);
+
+    return () => clearInterval(timer);
+  }, [gameState, performAutoSave]);
 
   const loadGame = (save: GameSave) => {
     setPlayer({ 
@@ -187,6 +214,17 @@ export default function GameContainer() {
           setHighScore(prevHigh => {
             const nextHigh = Math.max(prevHigh, currentScore);
             localStorage.setItem(STORAGE_KEY_HIGHSCORE, nextHigh.toString());
+            
+            // Completion AutoSave
+            saveSystem.autoSave({
+              score: currentScore,
+              highScore: nextHigh,
+              achievements: [...achievements, "Jungle Explorer"],
+              health: prev.health,
+              currentLevel: 'Level 1 (Complete)'
+            });
+            toast.success("Progresso salvo ao completar a fase!");
+            
             return nextHigh;
           });
           return currentScore;
