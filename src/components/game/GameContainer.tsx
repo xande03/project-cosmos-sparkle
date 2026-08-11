@@ -1,8 +1,11 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useGameLoop } from '@/hooks/useGameLoop';
 import { level1 } from '@/lib/game/levels';
-import { Heart, Trophy, RefreshCw } from 'lucide-react';
+import { Heart, Trophy, RefreshCw, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SaveManager from './save-management/SaveManager';
+import { GameSave } from '@/lib/game/save-system';
+
 
 const GRAVITY = 1500;
 const JUMP_FORCE = -700;
@@ -24,6 +27,8 @@ export default function GameContainer() {
   const [collectibles, setCollectibles] = useState(level1.collectibles.map(c => ({ ...c, active: true })));
   const [enemies, setEnemies] = useState(level1.enemies.map(e => ({ ...e })));
   const [achievements, setAchievements] = useState<string[]>([]);
+  const [showSaveManager, setShowSaveManager] = useState(false);
+
   
   const keys = useRef<{ [key: string]: boolean }>({});
 
@@ -75,6 +80,29 @@ export default function GameContainer() {
       return prev;
     });
   };
+
+  const loadGame = (save: GameSave) => {
+    setPlayer({ 
+      x: 100, 
+      y: 400, 
+      vx: 0, 
+      vy: 0, 
+      width: 40, 
+      height: 40, 
+      isGrounded: false, 
+      health: save.health, 
+      invulnerable: 0 
+    });
+    setScore(save.score);
+    setHighScore(save.highScore);
+    setAchievements(save.achievements);
+    setCollectibles(level1.collectibles.map(c => ({ ...c, active: true }))); // Simplified
+    setEnemies(level1.enemies.map(e => ({ ...e })));
+    setGameState('playing');
+    setCameraX(0);
+    setShowSaveManager(false);
+  };
+
 
   const update = useCallback((deltaTime: number) => {
     if (gameState !== 'playing') return;
@@ -323,14 +351,36 @@ export default function GameContainer() {
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           {achievements.map((a, i) => (
             <span key={i} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium border border-purple-200">
               {a}
             </span>
           ))}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowSaveManager(true)}
+            className="ml-2 bg-stone-100 border-stone-200 hover:bg-stone-200 rounded-lg gap-2"
+          >
+            <Save className="w-4 h-4" /> Saves
+          </Button>
         </div>
       </div>
+
+      {showSaveManager && (
+        <SaveManager 
+          onLoad={loadGame}
+          onClose={() => setShowSaveManager(false)}
+          currentGameState={{
+            score,
+            highScore,
+            achievements,
+            health: player.health
+          }}
+        />
+      )}
+
 
       <div className="relative overflow-hidden rounded-2xl shadow-2xl border-8 border-stone-800 bg-stone-900">
         <canvas 
