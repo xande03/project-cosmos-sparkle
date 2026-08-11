@@ -9,6 +9,8 @@ const JUMP_FORCE = -700;
 const MOVE_SPEED = 300;
 const FRICTION = 0.8;
 const MAX_HEALTH = 3;
+const STORAGE_KEY_ACHIEVEMENTS = 'monkey-long-achievements';
+const STORAGE_KEY_HIGHSCORE = 'monkey-long-highscore';
 
 export default function GameContainer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -18,11 +20,30 @@ export default function GameContainer() {
   const [player, setPlayer] = useState({ x: 100, y: 400, vx: 0, vy: 0, width: 40, height: 40, isGrounded: false, health: MAX_HEALTH, invulnerable: 0 });
   const [cameraX, setCameraX] = useState(0);
   const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
   const [collectibles, setCollectibles] = useState(level1.collectibles.map(c => ({ ...c, active: true })));
   const [enemies, setEnemies] = useState(level1.enemies.map(e => ({ ...e })));
   const [achievements, setAchievements] = useState<string[]>([]);
   
   const keys = useRef<{ [key: string]: boolean }>({});
+
+  // Load saved data on mount
+  useEffect(() => {
+    const savedAchievements = localStorage.getItem(STORAGE_KEY_ACHIEVEMENTS);
+    const savedHighScore = localStorage.getItem(STORAGE_KEY_HIGHSCORE);
+    
+    if (savedAchievements) {
+      try {
+        setAchievements(JSON.parse(savedAchievements));
+      } catch (e) {
+        console.error("Failed to parse saved achievements", e);
+      }
+    }
+    
+    if (savedHighScore) {
+      setHighScore(parseInt(savedHighScore, 10) || 0);
+    }
+  }, []);
 
   const resetGame = () => {
     setPlayer({ x: 100, y: 400, vx: 0, vy: 0, width: 40, height: 40, isGrounded: false, health: MAX_HEALTH, invulnerable: 0 });
@@ -45,9 +66,14 @@ export default function GameContainer() {
   }, []);
 
   const addAchievement = (text: string) => {
-    if (!achievements.includes(text)) {
-      setAchievements(prev => [...prev, text]);
-    }
+    setAchievements(prev => {
+      if (!prev.includes(text)) {
+        const next = [...prev, text];
+        localStorage.setItem(STORAGE_KEY_ACHIEVEMENTS, JSON.stringify(next));
+        return next;
+      }
+      return prev;
+    });
   };
 
   const update = useCallback((deltaTime: number) => {
@@ -127,6 +153,16 @@ export default function GameContainer() {
       if (newX < level1.goal.position.x + level1.goal.size.x && newX + prev.width > level1.goal.position.x && newY < level1.goal.position.y + level1.goal.size.y && newY + prev.height > level1.goal.position.y) {
         setGameState('victory');
         addAchievement("Jungle Explorer");
+        
+        // Save high score
+        setScore(currentScore => {
+          setHighScore(prevHigh => {
+            const nextHigh = Math.max(prevHigh, currentScore);
+            localStorage.setItem(STORAGE_KEY_HIGHSCORE, nextHigh.toString());
+            return nextHigh;
+          });
+          return currentScore;
+        });
       }
 
       // Death by falling
@@ -274,9 +310,16 @@ export default function GameContainer() {
             ))}
           </div>
           <div className="h-8 w-px bg-stone-200" />
-          <div className="text-xl font-bold text-stone-700 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-yellow-500" />
-            {score.toLocaleString()}
+          <div className="flex flex-col">
+            <div className="text-xl font-bold text-stone-700 flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-yellow-500" />
+              {score.toLocaleString()}
+            </div>
+            {highScore > 0 && (
+              <div className="text-[10px] text-stone-400 font-bold uppercase tracking-tighter">
+                Best: {highScore.toLocaleString()}
+              </div>
+            )}
           </div>
         </div>
         
@@ -305,6 +348,7 @@ export default function GameContainer() {
             <div className="bg-white/10 p-6 rounded-2xl mb-8 w-64 text-center">
               <div className="text-stone-400 text-sm uppercase tracking-widest mb-1">Final Score</div>
               <div className="text-4xl font-bold">{score}</div>
+              {score > highScore && <div className="text-yellow-400 text-xs mt-2 font-bold animate-pulse italic">NEW BEST!</div>}
             </div>
             <Button onClick={resetGame} size="lg" className="bg-red-600 hover:bg-red-700 text-white gap-2 text-lg px-8 py-6 rounded-xl">
               <RefreshCw className="w-6 h-6" /> Restart
