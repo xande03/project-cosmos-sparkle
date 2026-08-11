@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+
 import GameContainer from "@/components/game/GameContainer";
 import { Toaster } from "@/components/ui/sonner";
 
