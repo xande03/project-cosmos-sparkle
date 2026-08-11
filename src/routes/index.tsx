@@ -33,6 +33,10 @@ function Index() {
             <h3 className="font-bold text-stone-800 uppercase text-sm tracking-wider">Goal</h3>
             <p className="text-sm">Reach the purple zone at the end of the level to win.</p>
           </div>
+          <div className="flex flex-col gap-1">
+            <h3 className="font-bold text-stone-800 uppercase text-sm tracking-wider">Auto Save</h3>
+            <p className="text-sm">O jogo salva automaticamente a cada 60 segundos e ao vencer a fase.</p>
+          </div>
         </footer>
       </div>
       <Toaster />
