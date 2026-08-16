@@ -15,6 +15,7 @@ const FRICTION = 0.8;
 const MAX_HEALTH = 3;
 const STORAGE_KEY_ACHIEVEMENTS = 'monkey-long-achievements';
 const STORAGE_KEY_HIGHSCORE = 'monkey-long-highscore';
+const STORAGE_KEY_AUTOSAVE_INTERVAL = 'monkey-long-autosave-interval';
 
 export default function GameContainer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,7 +32,7 @@ export default function GameContainer() {
   const [showSaveManager, setShowSaveManager] = useState(false);
 
   const [lastAutoSaveTime, setLastAutoSaveTime] = useState(Date.now());
-  const AUTOSAVE_INTERVAL = 60000; // 60 seconds
+  const [autoSaveInterval, setAutoSaveInterval] = useState(60000); // Default 60 seconds
 
   const keys = useRef<{ [key: string]: boolean }>({});
 
@@ -39,6 +40,7 @@ export default function GameContainer() {
   useEffect(() => {
     const savedAchievements = localStorage.getItem(STORAGE_KEY_ACHIEVEMENTS);
     const savedHighScore = localStorage.getItem(STORAGE_KEY_HIGHSCORE);
+    const savedAutoSaveInterval = localStorage.getItem(STORAGE_KEY_AUTOSAVE_INTERVAL);
     
     if (savedAchievements) {
       try {
@@ -50,6 +52,10 @@ export default function GameContainer() {
     
     if (savedHighScore) {
       setHighScore(parseInt(savedHighScore, 10) || 0);
+    }
+
+    if (savedAutoSaveInterval) {
+      setAutoSaveInterval(parseInt(savedAutoSaveInterval, 10) || 60000);
     }
   }, []);
 
@@ -94,8 +100,14 @@ export default function GameContainer() {
       currentLevel: 'Level 1'
     });
     setLastAutoSaveTime(Date.now());
-    toast.info("Jogo salvo automaticamente", { duration: 2000 });
-  }, [score, highScore, achievements, player.health]);
+    toast.info(`Jogo salvo automaticamente (${autoSaveInterval / 1000}s)`, { duration: 2000 });
+  }, [score, highScore, achievements, player.health, autoSaveInterval]);
+
+  const handleAutoSaveIntervalChange = (interval: number) => {
+    setAutoSaveInterval(interval);
+    localStorage.setItem(STORAGE_KEY_AUTOSAVE_INTERVAL, interval.toString());
+    toast.success(`Intervalo de auto save alterado para ${interval / 1000}s`);
+  };
 
   // Periodic AutoSave
   useEffect(() => {
@@ -103,10 +115,10 @@ export default function GameContainer() {
     
     const timer = setInterval(() => {
       performAutoSave();
-    }, AUTOSAVE_INTERVAL);
+    }, autoSaveInterval);
 
     return () => clearInterval(timer);
-  }, [gameState, performAutoSave]);
+  }, [gameState, performAutoSave, autoSaveInterval]);
 
   const loadGame = (save: GameSave) => {
     setPlayer({ 
@@ -416,6 +428,8 @@ export default function GameContainer() {
             achievements,
             health: player.health
           }}
+          autoSaveInterval={autoSaveInterval}
+          onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
         />
       )}
 
