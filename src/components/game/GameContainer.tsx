@@ -92,12 +92,16 @@ export default function GameContainer() {
   };
 
   const performAutoSave = useCallback(() => {
+    const canvas = canvasRef.current;
+    const phasePreview = canvas ? canvas.toDataURL('image/jpeg', 0.5) : undefined;
+    
     saveSystem.autoSave({
       score,
       highScore,
       achievements,
       health: player.health,
-      currentLevel: 'Level 1'
+      currentLevel: 'Level 1',
+      phasePreview,
     });
     setLastAutoSaveTime(Date.now());
     toast.info(`Jogo salvo automaticamente (${autoSaveInterval / 1000}s)`, { duration: 2000 });
@@ -233,7 +237,8 @@ export default function GameContainer() {
               highScore: nextHigh,
               achievements: [...achievements, "Jungle Explorer"],
               health: prev.health,
-              currentLevel: 'Level 1 (Complete)'
+              currentLevel: 'Level 1 (Complete)',
+              phasePreview: canvasRef.current?.toDataURL('image/jpeg', 0.5),
             });
             toast.success("Progresso salvo ao completar a fase!");
             
