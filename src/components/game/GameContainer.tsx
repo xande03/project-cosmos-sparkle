@@ -411,9 +411,17 @@ export default function GameContainer() {
             variant="outline" 
             size="sm" 
             onClick={() => setShowSaveManager(true)}
-            className="ml-2 bg-stone-100 border-stone-200 hover:bg-stone-200 rounded-lg gap-2"
+            className="ml-2 bg-stone-100 border-stone-200 hover:bg-stone-200 rounded-lg gap-2 font-bold"
           >
             <Save className="w-4 h-4" /> Saves
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={() => performAutoSave()}
+            className="bg-green-600 hover:bg-green-700 text-white rounded-lg gap-2 font-bold"
+          >
+            <Save className="w-4 h-4" /> Save Now
           </Button>
         </div>
       </div>
