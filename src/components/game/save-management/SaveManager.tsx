@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { saveSystem, GameSave } from '@/lib/game/save-system';
 import { Button } from '@/components/ui/button';
-import { Save, Trash2, Play, Plus, X } from 'lucide-react';
+import { Save, Trash2, Play, Plus, X, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface SaveManagerProps {
   onLoad: (save: GameSave) => void;
   onClose: () => void;
   currentGameState: Partial<GameSave>;
+  phasePreview?: string | undefined;
   autoSaveInterval: number;
   onAutoSaveIntervalChange: (interval: number) => void;
 }
 
-export default function SaveManager({ 
-  onLoad, 
-  onClose, 
+export default function SaveManager({
+  onLoad,
+  onClose,
   currentGameState,
+  phasePreview,
   autoSaveInterval,
   onAutoSaveIntervalChange
 }: SaveManagerProps) {
@@ -38,7 +40,10 @@ export default function SaveManager({
 
   const executeSave = (slotId: string) => {
     const name = `Jungle Run ${saves.length + 1}`;
-    saveSystem.saveGame(slotId, name, currentGameState);
+    saveSystem.saveGame(slotId, name, {
+      ...currentGameState,
+      phasePreview,
+    });
     setSaves(saveSystem.getSaves());
     setConfirmingSlot(null);
   };
@@ -141,9 +146,16 @@ export default function SaveManager({
                   ) : (
                     <>
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center 
-                          ${save ? 'bg-green-100 text-green-600' : 'bg-stone-200 text-stone-400'}`}>
-                          {save ? <Play className="w-6 h-6 fill-current" /> : <Plus className="w-6 h-6" />}
+                        <div className="relative w-16 h-12 rounded-lg overflow-hidden border border-stone-200 bg-stone-100 flex items-center justify-center flex-shrink-0">
+                          {save?.phasePreview ? (
+                            <img 
+                              src={save.phasePreview} 
+                              alt="Phase preview" 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Play className={`w-5 h-5 ${save ? 'text-green-500' : 'text-stone-400'}`} />
+                          )}
                         </div>
                         
                         <div>
@@ -153,7 +165,11 @@ export default function SaveManager({
                               <div className="flex gap-3 text-xs text-stone-500 font-medium">
                                 <span>Score: {save.score}</span>
                                 <span>•</span>
-                                <span>{format(save.timestamp, 'MMM d, HH:mm')}</span>
+                                <span>{save.currentLevel}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-[10px] text-stone-400 font-medium mt-1">
+                                <Clock className="w-3 h-3" />
+                                <span>{format(save.timestamp, 'MMM d, yyyy • HH:mm')}</span>
                               </div>
                             </>
                           ) : (

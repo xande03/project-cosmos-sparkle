@@ -9,6 +9,7 @@ export interface GameSave {
   achievements: string[];
   currentLevel: string;
   health: number;
+  phasePreview?: string | undefined;
 }
 
 const STORAGE_KEY = 'monkey-long-saves';
@@ -27,7 +28,7 @@ export const saveSystem = {
   saveGame: (slotId: string, name: string, data: Partial<GameSave>) => {
     const saves = saveSystem.getSaves();
     const existingIndex = saves.findIndex(s => s.id === slotId);
-    
+
     const newSave: GameSave = {
       id: slotId,
       name: name,
@@ -37,6 +38,7 @@ export const saveSystem = {
       achievements: data.achievements || [],
       currentLevel: data.currentLevel || 'Level 1',
       health: data.health || 3,
+      phasePreview: data.phasePreview,
     };
 
     if (existingIndex >= 0) {
