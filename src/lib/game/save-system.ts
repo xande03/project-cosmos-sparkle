@@ -9,7 +9,7 @@ export interface GameSave {
   achievements: string[];
   currentLevel: string;
   health: number;
-  phasePreview?: string;
+  phasePreview?: string | undefined;
 }
 
 const STORAGE_KEY = 'monkey-long-saves';
