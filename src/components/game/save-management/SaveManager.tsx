@@ -20,6 +20,7 @@ export default function SaveManager({
   onAutoSaveIntervalChange
 }: SaveManagerProps) {
   const [saves, setSaves] = useState<GameSave[]>([]);
+  const [confirmingSlot, setConfirmingSlot] = useState<{ id: string, type: 'save' | 'delete' } | null>(null);
   const slots = ['slot-1', 'slot-2', 'slot-3'];
 
   useEffect(() => {
@@ -27,15 +28,30 @@ export default function SaveManager({
   }, []);
 
   const handleSave = (slotId: string) => {
-    const name = `Jungle Run ${saves.length + 1}`;
-    const newSave = saveSystem.saveGame(slotId, name, currentGameState);
-    setSaves(saveSystem.getSaves());
+    const existingSave = saves.find(s => s.id === slotId);
+    if (existingSave) {
+      setConfirmingSlot({ id: slotId, type: 'save' });
+    } else {
+      executeSave(slotId);
+    }
   };
 
-  const handleDelete = (e: React.MouseEvent, slotId: string) => {
+  const executeSave = (slotId: string) => {
+    const name = `Jungle Run ${saves.length + 1}`;
+    saveSystem.saveGame(slotId, name, currentGameState);
+    setSaves(saveSystem.getSaves());
+    setConfirmingSlot(null);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, slotId: string) => {
     e.stopPropagation();
+    setConfirmingSlot({ id: slotId, type: 'delete' });
+  };
+
+  const executeDelete = (slotId: string) => {
     saveSystem.deleteSave(slotId);
     setSaves(saveSystem.getSaves());
+    setConfirmingSlot(null);
   };
 
   return (
@@ -79,6 +95,7 @@ export default function SaveManager({
             <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider">Save Slots</h3>
             {slots.map((slotId) => {
               const save = saves.find(s => s.id === slotId);
+              const isConfirming = confirmingSlot?.id === slotId;
               
               return (
                 <div 
@@ -87,54 +104,90 @@ export default function SaveManager({
                     ${save 
                       ? 'bg-white border-stone-200 hover:border-green-500 hover:shadow-lg' 
                       : 'bg-stone-50 border-dashed border-stone-300 hover:border-stone-400'}`}
-                  onClick={() => save && onLoad(save)}
+                  onClick={() => !isConfirming && save && onLoad(save)}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center 
-                      ${save ? 'bg-green-100 text-green-600' : 'bg-stone-200 text-stone-400'}`}>
-                      {save ? <Play className="w-6 h-6 fill-current" /> : <Plus className="w-6 h-6" />}
+                  {isConfirming ? (
+                    <div className="flex-1 flex items-center justify-between animate-in fade-in slide-in-from-left-2 duration-200">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-stone-800 text-sm">
+                          {confirmingSlot.type === 'save' ? 'Overwrite this slot?' : 'Delete this save?'}
+                        </span>
+                        <span className="text-stone-500 text-[10px] uppercase font-bold tracking-tighter">This action cannot be undone</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="rounded-lg h-8 text-xs font-bold"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmingSlot(null);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className={`rounded-lg h-8 text-xs font-bold ${confirmingSlot.type === 'delete' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmingSlot.type === 'save' ? executeSave(slotId) : executeDelete(slotId);
+                          }}
+                        >
+                          Confirm
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div>
-                      {save ? (
-                        <>
-                          <h3 className="font-bold text-stone-800">{save.name}</h3>
-                          <div className="flex gap-3 text-xs text-stone-500 font-medium">
-                            <span>Score: {save.score}</span>
-                            <span>•</span>
-                            <span>{format(save.timestamp, 'MMM d, HH:mm')}</span>
-                          </div>
-                        </>
-                      ) : (
-                        <span className="font-bold text-stone-400 uppercase tracking-wider italic text-sm">Empty Slot</span>
-                      )}
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center 
+                          ${save ? 'bg-green-100 text-green-600' : 'bg-stone-200 text-stone-400'}`}>
+                          {save ? <Play className="w-6 h-6 fill-current" /> : <Plus className="w-6 h-6" />}
+                        </div>
+                        
+                        <div>
+                          {save ? (
+                            <>
+                              <h3 className="font-bold text-stone-800">{save.name}</h3>
+                              <div className="flex gap-3 text-xs text-stone-500 font-medium">
+                                <span>Score: {save.score}</span>
+                                <span>•</span>
+                                <span>{format(save.timestamp, 'MMM d, HH:mm')}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <span className="font-bold text-stone-400 uppercase tracking-wider italic text-sm">Empty Slot</span>
+                          )}
+                        </div>
+                      </div>
 
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white hover:bg-stone-900 border-none rounded-lg gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSave(slotId);
-                      }}
-                    >
-                      <Save className="w-4 h-4" /> Save
-                    </Button>
-                    
-                    {save && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                        onClick={(e) => handleDelete(e, slotId)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white hover:bg-stone-900 border-none rounded-lg gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSave(slotId);
+                          }}
+                        >
+                          <Save className="w-4 h-4" /> Save
+                        </Button>
+                        
+                        {save && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            onClick={(e) => handleDeleteClick(e, slotId)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}

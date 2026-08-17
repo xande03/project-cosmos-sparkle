@@ -34,8 +34,8 @@ function Index() {
             <p className="text-sm">Reach the purple zone at the end of the level to win.</p>
           </div>
           <div className="flex flex-col gap-1">
-            <h3 className="font-bold text-stone-800 uppercase text-sm tracking-wider">Auto Save</h3>
-            <p className="text-sm">O jogo salva automaticamente em intervalos definidos (configurável em Saves) e ao vencer a fase.</p>
+            <h3 className="font-bold text-stone-800 uppercase text-sm tracking-wider">Save System</h3>
+            <p className="text-sm">O jogo salva automaticamente em intervalos definidos, mas você também pode salvar manualmente ou gerenciar slots.</p>
           </div>
         </footer>
       </div>
