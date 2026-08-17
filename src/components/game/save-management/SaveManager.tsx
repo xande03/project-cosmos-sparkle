@@ -8,7 +8,7 @@ interface SaveManagerProps {
   onLoad: (save: GameSave) => void;
   onClose: () => void;
   currentGameState: Partial<GameSave>;
-  phasePreview?: string;
+  phasePreview?: string | undefined;
   autoSaveInterval: number;
   onAutoSaveIntervalChange: (interval: number) => void;
 }
