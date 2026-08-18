@@ -29,7 +29,7 @@ function DateTimeBadge() {
   }, []);
 
   return (
-    <Badge variant="secondary" className="fixed top-4 left-4 z-50 bg-black/70 text-white border-none">
+    <Badge variant="default" className="fixed bottom-4 left-4 z-50 bg-black/70 text-white border-none px-4 py-2">
       {currentDateTime}
     </Badge>
   );
