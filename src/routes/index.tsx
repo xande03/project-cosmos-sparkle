@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import GameContainer from '@/components/game/GameContainer'
 import SplashScreen from '@/components/game/SplashScreen'
 import DateTimeBadge from '@/components/game/DateTimeBadge'
+import Clouds from '@/components/game/Clouds'
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -28,6 +29,7 @@ function HomePage() {
     <main className="min-h-screen bg-background">
       <h1 className="sr-only">Monkey Long — Jogo de Plataforma</h1>
       <SplashScreen />
+      <Clouds />
       <GameContainer />
       <DateTimeBadge />
     </main>

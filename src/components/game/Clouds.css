@@ -1,0 +1,64 @@
+@keyframes cloud-move-1 {
+  from {
+    transform: translateX(-150px);
+  }
+  to {
+    transform: translateX(calc(100vw + 150px));
+  }
+}
+
+@keyframes cloud-move-2 {
+  from {
+    transform: translateX(-150px);
+  }
+  to {
+    transform: translateX(calc(100vw + 150px));
+  }
+}
+
+@keyframes cloud-move-3 {
+  from {
+    transform: translateX(-150px);
+  }
+  to {
+    transform: translateX(calc(100vw + 150px));
+  }
+}
+
+@keyframes cloud-move-4 {
+  from {
+    transform: translateX(-150px);
+  }
+  to {
+    transform: translateX(calc(100vw + 150px));
+  }
+}
+
+@keyframes cloud-move-5 {
+  from {
+    transform: translateX(-150px);
+  }
+  to {
+    transform: translateX(calc(100vw + 150px));
+  }
+}
+
+.animate-cloud-move-1 {
+  animation: cloud-move-1 linear infinite;
+}
+
+.animate-cloud-move-2 {
+  animation: cloud-move-2 linear infinite;
+}
+
+.animate-cloud-move-3 {
+  animation: cloud-move-3 linear infinite;
+}
+
+.animate-cloud-move-4 {
+  animation: cloud-move-4 linear infinite;
+}
+
+.animate-cloud-move-5 {
+  animation: cloud-move-5 linear infinite;
+}
