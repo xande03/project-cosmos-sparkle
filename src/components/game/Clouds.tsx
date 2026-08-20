@@ -7,6 +7,8 @@ export default function Clouds() {
       <div className="absolute top-20 right-40 w-40 h-20 bg-white rounded-full opacity-70 animate-pulse" style={{ animationDelay: '1s' }} />
       <div className="absolute top-5 left-1/2 w-36 h-18 bg-white rounded-full opacity-75 animate-pulse" style={{ animationDelay: '2s' }} />
       <div className="absolute top-30 left-1/3 w-28 h-14 bg-white rounded-full opacity-85 animate-pulse" style={{ animationDelay: '0.5s' }} />
+      {/* Sol */}
+      <div className="absolute top-10 right-10 w-20 h-20 bg-yellow-300 rounded-full shadow-lg shadow-yellow-400/50 animate-pulse" />
     </div>
   )
 }
