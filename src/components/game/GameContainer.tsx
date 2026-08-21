@@ -447,7 +447,6 @@ export default function GameContainer() {
         />
       )}
 
-
       <div className="relative overflow-hidden rounded-2xl shadow-2xl border-8 border-stone-800 bg-stone-900">
         <canvas 
           ref={canvasRef} 
@@ -486,6 +485,11 @@ export default function GameContainer() {
             </Button>
           </div>
         )}
+      </div>
+      
+      {/* Footer with developer attribution */}
+      <div className="w-full text-center text-stone-600 text-sm font-medium bg-white/80 backdrop-blur-sm p-3 rounded-lg border border-stone-200 mt-4">
+        desenvolvido por alexandre
       </div>
     </div>
   );
