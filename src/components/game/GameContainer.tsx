@@ -3,6 +3,7 @@ import { useGameLoop } from '@/hooks/useGameLoop';
 import { level1 } from '@/lib/game/levels';
 import { Heart, Trophy, RefreshCw, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import SaveManager from './save-management/SaveManager';
 import { GameSave, saveSystem } from '@/lib/game/save-system';
 import { toast } from 'sonner';
@@ -139,7 +140,7 @@ export default function GameContainer() {
     setScore(save.score);
     setHighScore(save.highScore);
     setAchievements(save.achievements);
-    setCollectibles(level1.collectibles.map(c => ({ ...c, active: true }))); // Simplified
+    setCollectibles(level1.collectibles.map(c => ({ ...c, active: true })));
     setEnemies(level1.enemies.map(e => ({ ...e })));
     setGameState('playing');
     setCameraX(0);
@@ -488,8 +489,10 @@ export default function GameContainer() {
       </div>
       
       {/* Footer with developer attribution */}
-      <div className="w-full text-center text-stone-600 text-sm font-medium bg-white/80 backdrop-blur-sm p-3 rounded-lg border border-stone-200 mt-4">
-        desenvolvido por alexandre
+      <div className="w-full flex justify-center">
+        <Badge variant="default" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 border-0 shadow-lg">
+          desenvolvido por Alexandre
+        </Badge>
       </div>
     </div>
   );
