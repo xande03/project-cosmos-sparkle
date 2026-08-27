@@ -20,6 +20,9 @@ export default function SplashScreen() {
       </div>
       
       <div className="text-center relative z-10">
+        <div className="mb-6">
+          <img src="/images/maqui1.png" alt="Maquiagem" className="h-48 mx-auto rounded-lg shadow-lg" />
+        </div>
         <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">bora jogar</h1>
         <p className="text-xl text-white mb-8">Olá, players</p>
         <Card className="bg-black bg-opacity-30 backdrop-blur-sm border-white border-opacity-20 max-w-md mx-auto">
