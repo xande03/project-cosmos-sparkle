@@ -27,8 +27,11 @@ export default function SplashScreen() {
             <p className="text-white text-lg mb-4 italic">"Porque onde estiver o vosso tesouro, aí estará também o vosso coração." - Mateus 6:21</p>
           </CardContent>
         </Card>
+        <div className="mb-6">
+          <img src="/images/super-mario-bross.png" alt="Super Mario Bross" className="h-48 mx-auto" />
+        </div>
         <Button 
-          className="bg-lime-500 hover:bg-lime-600 text-black text-lg px-8 py-4 rounded-xl font-bold mt-6"
+          className="bg-lime-500 hover:bg-lime-600 text-black text-lg px-8 py-4 rounded-xl font-bold"
           onClick={() => setIsVisible(false)}
         >
           Começar a Jogar
