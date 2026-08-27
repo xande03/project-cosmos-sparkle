@@ -21,7 +21,6 @@ export default function SplashScreen() {
           alt="Maquiagem" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       </div>
       
       <div className="text-center relative z-10">
