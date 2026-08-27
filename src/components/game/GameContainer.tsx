@@ -16,8 +16,8 @@ const MAX_HEALTH = 3;
 const STORAGE_KEY_ACHIEVEMENTS = 'monkey-long-achievements';
 const STORAGE_KEY_HIGHSCORE = 'monkey-long-highscore';
 const STORAGE_KEY_AUTOSAVE_INTERVAL = 'monkey-long-autosave-interval';
-const CANVAS_WIDTH = 900;
-const CANVAS_HEIGHT = 600;
+const LOGICAL_WIDTH = 900;
+const LOGICAL_HEIGHT = 600;
 
 export default function GameContainer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -49,11 +49,25 @@ export default function GameContainer() {
 
   const keys = useRef<{ [key: string]: boolean }>({});
 
+  // Resize canvas to fill the window
+  useEffect(() => {
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
-      canvas.width = CANVAS_WIDTH;
-      canvas.height = CANVAS_HEIGHT;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
 
     const savedAchievements = localStorage.getItem(STORAGE_KEY_ACHIEVEMENTS);
@@ -365,11 +379,17 @@ export default function GameContainer() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
+
+    // Scale to fill the entire screen
+    const scaleX = canvas.width / LOGICAL_WIDTH;
+    const scaleY = canvas.height / LOGICAL_HEIGHT;
+    ctx.scale(scaleX, scaleY);
+
     ctx.translate(-cameraX, 0);
 
     // Sky
     ctx.fillStyle = '#BAE6FD';
-    ctx.fillRect(cameraX, 0, canvas.width, canvas.height);
+    ctx.fillRect(cameraX, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
     // Platforms
     ctx.fillStyle = '#65A30D';
@@ -532,7 +552,7 @@ export default function GameContainer() {
   });
 
   return (
-    <div ref={containerRef} className="relative flex flex-col items-center justify-center min-h-screen bg-gray-900">
+    <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden bg-gray-900">
       {/* HUD */}
       <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-2">
@@ -572,9 +592,7 @@ export default function GameContainer() {
       </div>
 
       {/* Canvas */}
-      <div className="relative border-2 border-gray-700 rounded-lg overflow-hidden shadow-2xl">
-        <canvas ref={canvasRef} className="block" />
-      </div>
+      <canvas ref={canvasRef} className="block w-full h-full" />
 
       {/* Game Over */}
       {gameState === 'gameover' && (
@@ -618,7 +636,7 @@ export default function GameContainer() {
       )}
 
       {/* Controls hint */}
-      <div className="mt-3 text-gray-400 text-sm">
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-gray-400 text-sm">
         Use as setas do teclado ou WASD para mover e pular. Espaço também pula.
       </div>
     </div>
