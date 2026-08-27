@@ -22,7 +22,7 @@ export default function SplashScreen() {
         <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">olá, jogadores</h1>
         <p className="text-xl text-white mb-8">Olá, players</p>
         <Button 
-          className="bg-yellow-500 hover:bg-yellow-600 text-black text-lg px-8 py-4 rounded-xl font-bold"
+          className="bg-lime-500 hover:bg-lime-600 text-black text-lg px-8 py-4 rounded-xl font-bold"
           onClick={() => setIsVisible(false)}
         >
           Começar a Jogar
