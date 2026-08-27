@@ -363,137 +363,39 @@ export default function GameContainer() {
     ctx.fillStyle = '#8B5CF6';
     ctx.fillRect(level1.goal.position.x, level1.goal.position.y, level1.goal.size.x, level1.goal.size.y);
 
-    // Player
+    // Player — Monkey (Donkey Kong style)
     if (player.invulnerable <= 0 || Math.floor(Date.now() / 100) % 2 === 0) {
+      const cx = player.x + player.width / 2;
+      const headY = player.y + 10;
+
+      // Tail (curled behind)
+      ctx.strokeStyle = '#78350F';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(player.x + 8, player.y + 24);
+      ctx.quadraticCurveTo(player.x - 8, player.y + 20, player.x - 3, player.y + 10);
+      ctx.stroke();
+
+      // Legs
       ctx.fillStyle = '#78350F';
       ctx.beginPath();
-      ctx.roundRect(player.x, player.y, player.width, player.height, 10);
+      ctx.roundRect(player.x + 8, player.y + 30, 10, 9, 3);
       ctx.fill();
-      ctx.fillStyle = '#FDE68A';
       ctx.beginPath();
-      ctx.arc(player.x + player.width/2, player.y + 15, 12, 0, Math.PI * 2);
+      ctx.roundRect(player.x + 22, player.y + 30, 10, 9, 3);
       ctx.fill();
+
+      // Feet
+      ctx.fillStyle = '#44403C';
+      ctx.beginPath();
+      ctx.roundRect(player.x + 5, player.y + 36, 13, 4, 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(player.x + 22, player.y + 36, 13, 4, 2);
+      ctx.fill();
+
+      // Body
       ctx.fillStyle = '#78350F';
       ctx.beginPath();
-      ctx.arc(player.x, player.y + 15, 6, 0, Math.PI * 2);
-      ctx.arc(player.x + player.width, player.y + 15, 6, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    ctx.restore();
-  });
-
-  return (
-    <div className="relative flex flex-col items-center gap-4" ref={containerRef}>
-      {/* HUD */}
-      <div className="w-full flex justify-between items-center bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-stone-200">
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1">
-            {[...Array(MAX_HEALTH)].map((_, i) => (
-              <Heart key={i} className={`w-6 h-6 ${i < player.health ? 'fill-red-500 text-red-500' : 'text-stone-300'}`} />
-            ))}
-          </div>
-          <div className="h-8 w-px bg-stone-200" />
-          <div className="flex flex-col">
-            <div className="text-xl font-bold text-stone-700 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-yellow-500" />
-              {score.toLocaleString()}
-            </div>
-            {highScore > 0 && (
-              <div className="text-[10px] text-stone-400 font-bold uppercase tracking-tighter">
-                Best: {highScore.toLocaleString()}
-              </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="flex gap-2 items-center">
-          {achievements.map((a, i) => (
-            <span key={i} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium border border-purple-200">
-              {a}
-            </span>
-          ))}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setShowSaveManager(true)}
-            className="ml-2 bg-stone-100 border-stone-200 hover:bg-stone-200 rounded-lg gap-2 font-bold"
-          >
-            <Save className="w-4 h-4" /> Saves
-          </Button>
-          <Button 
-            variant="default" 
-            size="sm" 
-            onClick={() => performAutoSave()}
-            className="bg-green-600 hover:bg-green-700 text-white rounded-lg gap-2 font-bold"
-          >
-            <Save className="w-4 h-4" /> Save Now
-          </Button>
-        </div>
-      </div>
-
-      {showSaveManager && (
-        <SaveManager
-          onLoad={loadGame}
-          onClose={() => setShowSaveManager(false)}
-          currentGameState={{
-            score,
-            highScore,
-            achievements,
-            health: player.health
-          }}
-          phasePreview={canvasRef.current?.toDataURL('image/jpeg', 0.5)}
-          autoSaveInterval={autoSaveInterval}
-          onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
-        />
-      )}
-
-      <div className="relative overflow-hidden rounded-2xl shadow-2xl border-8 border-stone-800 bg-stone-900">
-        <canvas 
-          ref={canvasRef} 
-          width={800} 
-          height={600} 
-          className="block"
-        />
-
-        {/* Game Over Screen */}
-        {gameState === 'gameover' && (
-          <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm flex flex-col items-center justify-center text-white p-8">
-            <h2 className="text-6xl font-black mb-2 text-red-500 italic uppercase">Game Over</h2>
-            <p className="text-xl text-stone-300 mb-8 font-medium">Try again, Monkey Long!</p>
-            <div className="bg-white/10 p-6 rounded-2xl mb-8 w-64 text-center">
-              <div className="text-stone-400 text-sm uppercase tracking-widest mb-1">Final Score</div>
-              <div className="text-4xl font-bold">{score}</div>
-              {score > highScore && <div className="text-yellow-400 text-xs mt-2 font-bold animate-pulse italic">NEW BEST!</div>}
-            </div>
-            <Button onClick={resetGame} size="lg" className="bg-red-600 hover:bg-red-700 text-white gap-2 text-lg px-8 py-6 rounded-xl">
-              <RefreshCw className="w-6 h-6" /> Restart
-            </Button>
-          </div>
-        )}
-
-        {/* Victory Screen */}
-        {gameState === 'victory' && (
-          <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm flex flex-col items-center justify-center text-white p-8">
-            <h2 className="text-6xl font-black mb-2 text-yellow-400 italic uppercase">Victory!</h2>
-            <p className="text-xl text-stone-300 mb-8 font-medium">You reached the golden jungle!</p>
-            <div className="bg-white/10 p-6 rounded-2xl mb-8 w-64 text-center">
-              <div className="text-stone-400 text-sm uppercase tracking-widest mb-1">Final Score</div>
-              <div className="text-4xl font-bold">{score}</div>
-            </div>
-            <Button onClick={resetGame} size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black gap-2 text-lg px-8 py-6 rounded-xl font-bold">
-              <RefreshCw className="w-6 h-6" /> Play Again
-            </Button>
-          </div>
-        )}
-      </div>
-      
-      {/* Footer with developer attribution */}
-      <div className="w-full flex justify-center">
-        <Badge variant="default" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 border-0 shadow-lg">
-          desenvolvido por Alexandre
-        </Badge>
-      </div>
-    </div>
-  );
-}
+      ctx.roundRect(player.x + 6, player.y + 
