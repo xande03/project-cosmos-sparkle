@@ -22,18 +22,20 @@ const SplashScreen = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[70] flex items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900 transition-opacity duration-700 ${
+      className={`fixed inset-0 z-[70] flex items-center justify-center transition-opacity duration-700 bg-cover bg-center ${
         stage === 'fading' ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}
+      style={{ backgroundImage: "url('/uploads/mario.png')" }}
     >
-      <div className="px-4 text-center">
-        <img
-          src="/uploads/mario.png"
-          alt="Cosmos Sparkle"
-          className="mx-auto mb-6 max-h-48 w-auto rounded-2xl object-contain drop-shadow-2xl md:max-h-64"
-        />
-        <h1 className="mb-4 text-4xl font-bold text-white md:text-6xl">Cosmos Sparkle</h1>
-        <p className="text-xl text-white opacity-80">Carregando sua aventura...</p>
+      {/* Overlay escuro para garantir legibilidade do texto */}
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="relative z-10 px-4 text-center">
+        <h1 className="mb-4 text-4xl font-bold text-white drop-shadow-lg md:text-6xl">
+          Cosmos Sparkle
+        </h1>
+        <p className="text-xl text-white opacity-90 drop-shadow-md">
+          Carregando sua aventura...
+        </p>
       </div>
     </div>
   );
