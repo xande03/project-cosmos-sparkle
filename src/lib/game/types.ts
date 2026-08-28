@@ -26,4 +26,6 @@ export interface Level {
   enemies: Enemy[];
   collectibles: Entity[];
   goal: Entity;
+  trees?: Entity[];
+  birds?: (Entity & { speed?: number })[];
 }
