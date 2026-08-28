@@ -1,5 +1,6 @@
 import React from 'react'
 import './Clouds.css'
+import Birds from './Birds'
 
 interface CloudProps {
   className?: string
@@ -28,6 +29,7 @@ export default function Clouds() {
       <Cloud className="cloud-4" />
       <Cloud className="cloud-5" />
       <Cloud className="cloud-6" />
+      <Birds />
     </div>
   )
 }
