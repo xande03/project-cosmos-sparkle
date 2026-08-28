@@ -18,9 +18,9 @@ export default function SplashScreen() {
       <div className="text-center relative z-10">
         <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">bora jogar</h1>
         <p className="text-xl text-white mb-8">Olá, players</p>
-        <Card className="bg-black bg-opacity-30 backdrop-blur-sm border-white border-opacity-20 max-w-md mx-auto">
+        <Card className="bg-[#84cc16] border-[#84cc16] max-w-md mx-auto">
           <CardContent className="p-6">
-            <p className="text-white text-lg mb-4 italic">"Porque onde estiver o vosso tesouro, aí estará também o vosso coração." - Mateus 6:21</p>
+            <p className="text-black text-lg mb-4 italic">"Porque onde estiver o vosso tesouro, aí estará também o vosso coração." - Mateus 6:21</p>
           </CardContent>
         </Card>
         <Button 
