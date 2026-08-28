@@ -478,12 +478,122 @@ export default function GameContainer() {
     ctx.fillStyle = '#2ecc71';
     ctx.fillRect(level1.goal.position.x, level1.goal.position.y, level1.goal.size.x, level1.goal.size.y);
 
-    // Player
+    // Player - Monkey character (Donkey Kong style)
     if (player.invulnerable === 0 || Math.floor(player.invulnerable * 10) % 2 === 0) {
-      ctx.fillStyle = '#8B5A2B';
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-      ctx.fillStyle = '#f5d6a8';
-      ctx.fillRect(player.x + 8, player.y + 10, player.width - 16, player.height - 18);
+      const px = player.x;
+      const py = player.y;
+      const w = player.width;
+      const h = player.height;
+
+      // --- Body (brown) ---
+      ctx.fillStyle = '#6B3A2A';
+      ctx.beginPath();
+      ctx.roundRect(px + 2, py + 12, w - 4, h - 18, 4);
+      ctx.fill();
+
+      // --- Belly (lighter) ---
+      ctx.fillStyle = '#A67B5B';
+      ctx.beginPath();
+      ctx.roundRect(px + 6, py + 16, w - 12, h - 24, 3);
+      ctx.fill();
+
+      // --- Head (circle) ---
+      const headRadius = 12;
+      const headCenterX = px + w / 2;
+      const headCenterY = py + 10;
+      ctx.fillStyle = '#6B3A2A';
+      ctx.beginPath();
+      ctx.arc(headCenterX, headCenterY, headRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // --- Ears ---
+      ctx.fillStyle = '#5A2D1A';
+      ctx.beginPath();
+      ctx.arc(headCenterX - headRadius + 2, headCenterY - 2, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(headCenterX + headRadius - 2, headCenterY - 2, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // --- Face (lighter) ---
+      ctx.fillStyle = '#D4A574';
+      ctx.beginPath();
+      ctx.arc(headCenterX, headCenterY + 1, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // --- Eyes ---
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(headCenterX - 3, headCenterY - 2, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(headCenterX + 3, headCenterY - 2, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#222';
+      ctx.beginPath();
+      ctx.arc(headCenterX - 2, headCenterY - 1, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(headCenterX + 4, headCenterY - 1, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // --- Mouth (smile) ---
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(headCenterX, headCenterY + 4, 4, 0.1 * Math.PI, 0.9 * Math.PI);
+      ctx.stroke();
+
+      // --- Tie (Donkey Kong style) ---
+      ctx.fillStyle = '#D32F2F';
+      ctx.beginPath();
+      ctx.moveTo(px + w / 2 - 3, py + 12);
+      ctx.lineTo(px + w / 2 + 3, py + 12);
+      ctx.lineTo(px + w / 2 + 2, py + 20);
+      ctx.lineTo(px + w / 2, py + 18);
+      ctx.lineTo(px + w / 2 - 2, py + 20);
+      ctx.closePath();
+      ctx.fill();
+
+      // --- Arms ---
+      ctx.strokeStyle = '#6B3A2A';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(px + 2, py + 16);
+      ctx.lineTo(px - 4, py + 24);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(px + w - 2, py + 16);
+      ctx.lineTo(px + w + 4, py + 24);
+      ctx.stroke();
+
+      // --- Hands (fists) ---
+      ctx.fillStyle = '#5A2D1A';
+      ctx.beginPath();
+      ctx.arc(px - 4, py + 24, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(px + w + 4, py + 24, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // --- Legs ---
+      ctx.fillStyle = '#6B3A2A';
+      ctx.fillRect(px + 4, py + h - 10, 6, 10);
+      ctx.fillRect(px + w - 10, py + h - 10, 6, 10);
+
+      // --- Feet ---
+      ctx.fillStyle = '#5A2D1A';
+      ctx.fillRect(px + 2, py + h - 4, 10, 4);
+      ctx.fillRect(px + w - 12, py + h - 4, 10, 4);
+
+      // --- Tail (curved) ---
+      ctx.strokeStyle = '#6B3A2A';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(px + w - 2, py + 14);
+      ctx.quadraticCurveTo(px + w + 12, py - 4, px + w + 6, py - 10);
+      ctx.stroke();
     }
 
     ctx.restore();
