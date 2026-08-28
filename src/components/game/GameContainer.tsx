@@ -392,6 +392,215 @@ export default function GameContainer() {
     const scaleY = canvas.height / LOGICAL_HEIGHT;
     ctx.scale(scaleX, scaleY);
 
-    ctx.translate(-ca
+    ctx.translate(-cameraX, 0);
 
-/* [CONTEÚDO TRUNCADO POR LIMITE DE CONTEXTO — este arquivo JÁ EXISTE. NUNCA o recrie do zero; aplique a mudança preservando todo o restante do código original.] */
+    // Sky gradient
+    const sky = ctx.createLinearGradient(cameraX, 0, cameraX, LOGICAL_HEIGHT);
+    sky.addColorStop(0, '#7ec8e3');
+    sky.addColorStop(1, '#c9e8f5');
+    ctx.fillStyle = sky;
+    ctx.fillRect(cameraX, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+    // Trees (background decoration)
+    level1.trees?.forEach((t) => {
+      ctx.fillStyle = '#5d4037';
+      ctx.fillRect(
+        t.position.x + t.size.x / 2 - 6,
+        t.position.y + t.size.y * 0.4,
+        12,
+        t.size.y * 0.6,
+      );
+      ctx.fillStyle = '#2e7d32';
+      ctx.beginPath();
+      ctx.arc(t.position.x + t.size.x / 2, t.position.y + t.size.y * 0.3, t.size.x / 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Birds
+    ctx.fillStyle = '#37474f';
+    level1.birds?.forEach((b) => {
+      const bx = b.position.x + ((Date.now() / 1000) * (b.speed ?? 2) * 40) % (level1.width + 200) - 100;
+      const by = b.position.y + Math.sin(Date.now() / 300 + b.position.x) * 10;
+      ctx.beginPath();
+      ctx.ellipse(bx, by, b.size.x / 2, b.size.y / 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Platforms
+    level1.platforms.forEach((p) => {
+      ctx.fillStyle = '#6d4c41';
+      ctx.fillRect(p.position.x, p.position.y, p.size.x, p.size.y);
+      ctx.fillStyle = '#43a047';
+      ctx.fillRect(p.position.x, p.position.y, p.size.x, Math.min(8, p.size.y));
+    });
+
+    // Obstacles (spikes)
+    level1.obstacles.forEach((o) => {
+      ctx.fillStyle = '#c62828';
+      const spikes = 3;
+      const w = o.size.x / spikes;
+      for (let i = 0; i < spikes; i++) {
+        ctx.beginPath();
+        ctx.moveTo(o.position.x + i * w, o.position.y + o.size.y);
+        ctx.lineTo(o.position.x + i * w + w / 2, o.position.y);
+        ctx.lineTo(o.position.x + (i + 1) * w, o.position.y + o.size.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+    });
+
+    // Enemies
+    enemies.forEach((e) => {
+      ctx.fillStyle = '#7b1fa2';
+      ctx.fillRect(e.position.x, e.position.y, e.size.x, e.size.y);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(e.position.x + 8, e.position.y + 10, 8, 8);
+      ctx.fillRect(e.position.x + e.size.x - 16, e.position.y + 10, 8, 8);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(e.position.x + 10, e.position.y + 12, 4, 4);
+      ctx.fillRect(e.position.x + e.size.x - 14, e.position.y + 12, 4, 4);
+    });
+
+    // Collectibles (bananas)
+    collectibles.forEach((c) => {
+      if (!c.active) return;
+      ctx.fillStyle = '#fdd835';
+      ctx.beginPath();
+      ctx.arc(
+        c.position.x + c.size.x / 2,
+        c.position.y + c.size.y / 2,
+        c.size.x / 2,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
+      ctx.strokeStyle = '#f9a825';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    });
+
+    // Goal flag
+    ctx.fillStyle = '#5d4037';
+    ctx.fillRect(level1.goal.position.x + 5, level1.goal.position.y, 6, level1.goal.size.y);
+    ctx.fillStyle = '#ffb300';
+    ctx.beginPath();
+    ctx.moveTo(level1.goal.position.x + 11, level1.goal.position.y);
+    ctx.lineTo(level1.goal.position.x + level1.goal.size.x, level1.goal.position.y + 18);
+    ctx.lineTo(level1.goal.position.x + 11, level1.goal.position.y + 36);
+    ctx.closePath();
+    ctx.fill();
+
+    // Player (monkey) — blinks while invulnerable
+    const blink = player.invulnerable > 0 && Math.floor(Date.now() / 100) % 2 === 0;
+    if (!blink) {
+      ctx.fillStyle = '#8d6e63';
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+      ctx.fillStyle = '#d7ccc8';
+      ctx.fillRect(player.x + 6, player.y + 12, player.width - 12, player.height - 20);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(player.x + 10, player.y + 8, 5, 5);
+      ctx.fillRect(player.x + player.width - 15, player.y + 8, 5, 5);
+    }
+
+    ctx.restore();
+  });
+
+  return (
+    <div ref={containerRef} className="relative w-screen h-screen overflow-hidden bg-stone-900">
+      <canvas ref={canvasRef} className="block w-full h-full" />
+
+      {/* HUD */}
+      <div className="absolute top-0 left-0 right-0 p-4 flex items-start justify-between pointer-events-none">
+        <div className="flex flex-col gap-2 pointer-events-auto">
+          <div className="flex items-center gap-1 bg-stone-900/70 rounded-full px-4 py-2">
+            {Array.from({ length: MAX_HEALTH }).map((_, i) => (
+              <Heart
+                key={i}
+                className={`w-5 h-5 ${i < player.health ? 'text-red-500 fill-red-500' : 'text-stone-600'}`}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2 bg-stone-900/70 rounded-full px-4 py-2 text-white font-bold">
+            <Trophy className="w-4 h-4 text-yellow-400" />
+            <span>{score}</span>
+            <span className="text-stone-400 text-sm">| Best: {highScore}</span>
+          </div>
+          {achievements.length > 0 && (
+            <div className="flex flex-wrap gap-1 max-w-xs">
+              {achievements.map((a) => (
+                <Badge key={a} className="bg-yellow-500 text-stone-900 font-bold">
+                  {a}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2 pointer-events-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-stone-900/70 text-white border-stone-700 gap-2"
+            onClick={performAutoSave}
+          >
+            <Save className="w-4 h-4" /> Salvar
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-stone-900/70 text-white border-stone-700"
+            onClick={() => setShowSaveManager(true)}
+          >
+            Saves
+          </Button>
+        </div>
+      </div>
+
+      {/* Game Over */}
+      {gameState === 'gameover' && (
+        <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white rounded-3xl p-10 text-center shadow-2xl">
+            <h2 className="text-4xl font-black text-red-600 uppercase italic mb-2">Game Over</h2>
+            <p className="text-stone-600 font-bold mb-1">Pontuação: {score}</p>
+            <p className="text-stone-400 text-sm mb-6">Recorde: {highScore}</p>
+            <Button onClick={resetGame} className="bg-stone-800 gap-2 rounded-xl">
+              <RefreshCw className="w-4 h-4" /> Reiniciar
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Victory */}
+      {gameState === 'victory' && (
+        <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white rounded-3xl p-10 text-center shadow-2xl">
+            <h2 className="text-4xl font-black text-green-600 uppercase italic mb-2">Vitória!</h2>
+            <p className="text-stone-600 font-bold mb-1">Pontuação: {score}</p>
+            <p className="text-stone-400 text-sm mb-6">Recorde: {highScore}</p>
+            <Button onClick={resetGame} className="bg-green-600 hover:bg-green-700 gap-2 rounded-xl">
+              <RefreshCw className="w-4 h-4" /> Jogar Novamente
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Save Manager */}
+      {showSaveManager && (
+        <SaveManager
+          onLoad={loadGame}
+          onClose={() => setShowSaveManager(false)}
+          currentGameState={{
+            score,
+            highScore,
+            achievements,
+            health: player.health,
+            currentLevel: 'Level 1',
+          }}
+          phasePreview={canvasRef.current?.toDataURL('image/jpeg', 0.5)}
+          autoSaveInterval={autoSaveInterval}
+          onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
+        />
+      )}
+    </div>
+  );
+}
