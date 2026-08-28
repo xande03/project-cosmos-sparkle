@@ -14,34 +14,8 @@ export default function SplashScreen() {
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-          <div className="my-8 flex justify-center">
-          <div className="w-full flex justify-center">
-            <img
-              src="/HOMEM DE FERRO.png"
-              alt="HOMEM DE FERRO"
-              className="max-w-full h-auto rounded-lg"
-            />
-          </div>
-          <div className="w-full flex justify-center">
-            <img
-              src="/HOMEM DE FERRO.png"
-              alt="HOMEM DE FERRO"
-              className="max-w-full h-auto rounded-lg"
-            />
-          </div>
-          </div>
-
       <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1920&q=80')" }}>
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-      </div>
-      
-      {/* Iron Man Image */}
-      <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2 z-20">
-        <img 
-          src="/HOMEM-DE-FERRO.png" 
-          alt="Iron Man" 
-          className="w-64 h-auto object-contain drop-shadow-2xl"
-        />
       </div>
       
       <div className="text-center relative z-10">
