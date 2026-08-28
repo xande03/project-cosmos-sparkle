@@ -12,7 +12,7 @@ export interface Player extends Entity {
 }
 
 export interface Enemy extends Entity {
-  type: 'patrol' | 'spike';
+  type: 'patrol' | 'spike' | 'static';
   range?: number;
   speed?: number;
   startPos?: Vector2;

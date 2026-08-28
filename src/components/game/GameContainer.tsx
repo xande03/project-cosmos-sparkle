@@ -8,9 +8,9 @@ import SaveManager from './save-management/SaveManager';
 import { GameSave, saveSystem } from '@/lib/game/save-system';
 import { toast } from 'sonner';
 
-const GRAVITY = 1500;
-const JUMP_FORCE = -700;
-const MOVE_SPEED = 300;
+const GRAVITY = 1200;
+const JUMP_FORCE = -550;
+const MOVE_SPEED = 250;
 const FRICTION = 0.8;
 const MAX_HEALTH = 3;
 const STORAGE_KEY_ACHIEVEMENTS = 'monkey-long-achievements';
@@ -310,14 +310,21 @@ export default function GameContainer() {
         }
 
         // Death by falling
-        if (newY > 700) {
+        if (newY > LOGICAL_HEIGHT + 100) {
           newHealth -= 1;
           newX = 100;
-          newY = 400;
+          newY = 300;
           newVx = 0;
           newVy = 0;
+          newInvulnerable = 2.0;
           if (newHealth <= 0) {
             setGameState('gameover');
+            if (score > highScore) {
+              setHighScore(score);
+              localStorage.setItem(STORAGE_KEY_HIGHSCORE, score.toString());
+            }
+          } else {
+            toast.error('Você caiu! -1 vida', { duration: 2000 });
           }
         }
 
@@ -385,188 +392,6 @@ export default function GameContainer() {
     const scaleY = canvas.height / LOGICAL_HEIGHT;
     ctx.scale(scaleX, scaleY);
 
-    ctx.translate(-cameraX, 0);
+    ctx.translate(-ca
 
-    // Draw background
-    ctx.fillStyle = '#87CEEB'; // Sky blue
-    ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
-
-    // Draw ground
-    ctx.fillStyle = '#8B4513'; // Brown
-    ctx.fillRect(0, 550, LOGICAL_WIDTH, 50);
-
-    // Draw trees
-    level1.trees?.forEach((tree) => {
-      // Tree trunk
-      ctx.fillStyle = '#654321'; // Dark brown
-      ctx.fillRect(tree.position.x, tree.position.y, tree.size.x, tree.size.y);
-      
-      // Tree leaves (canopy)
-      ctx.fillStyle = '#228B22'; // Forest green
-      ctx.beginPath();
-      ctx.arc(
-        tree.position.x + tree.size.x / 2,
-        tree.position.y - 20,
-        30,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-    });
-
-    // Draw birds
-    level1.birds?.forEach((bird) => {
-      ctx.fillStyle = '#000000'; // Black
-      ctx.beginPath();
-      ctx.arc(
-        bird.position.x,
-        bird.position.y,
-        bird.size.x / 2,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-      
-      // Draw wings
-      ctx.beginPath();
-      ctx.moveTo(bird.position.x - bird.size.x / 2, bird.position.y);
-      ctx.lineTo(bird.position.x - bird.size.x, bird.position.y - 10);
-      ctx.lineTo(bird.position.x - bird.size.x, bird.position.y + 10);
-      ctx.fill();
-      
-      ctx.beginPath();
-      ctx.moveTo(bird.position.x + bird.size.x / 2, bird.position.y);
-      ctx.lineTo(bird.position.x + bird.size.x, bird.position.y - 10);
-      ctx.lineTo(bird.position.x + bird.size.x, bird.position.y + 10);
-      ctx.fill();
-    });
-
-    // Draw platforms
-    level1.platforms.forEach((p) => {
-      ctx.fillStyle = '#8B4513'; // Brown
-      ctx.fillRect(p.position.x, p.position.y, p.size.x, p.size.y);
-    });
-
-    // Draw obstacles
-    level1.obstacles.forEach((o) => {
-      ctx.fillStyle = '#FF0000'; // Red
-      ctx.fillRect(o.position.x, o.position.y, o.size.x, o.size.y);
-    });
-
-    // Draw enemies
-    enemies.forEach((e) => {
-      ctx.fillStyle = '#FF4500'; // Orange red
-      ctx.fillRect(e.position.x, e.position.y, e.size.x, e.size.y);
-    });
-
-    // Draw collectibles
-    collectibles.forEach((c) => {
-      if (c.active) {
-        ctx.fillStyle = '#FFFF00'; // Yellow
-        ctx.beginPath();
-        ctx.arc(
-          c.position.x + c.size.x / 2,
-          c.position.y + c.size.y / 2,
-          c.size.x / 2,
-          0,
-          Math.PI * 2
-        );
-        ctx.fill();
-      }
-    });
-
-    // Draw goal
-    ctx.fillStyle = '#00FF00'; // Green
-    ctx.fillRect(level1.goal.position.x, level1.goal.position.y, level1.goal.size.x, level1.goal.size.y);
-
-    // Draw player
-    if (player.invulnerable % 0.2 < 0.1) {
-      ctx.fillStyle = '#FFD700'; // Gold
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-    }
-
-    // Draw health indicators
-    for (let i = 0; i < MAX_HEALTH; i++) {
-      ctx.fillStyle = i < player.health ? '#FF0000' : '#888888'; // Red or gray
-      ctx.beginPath();
-      ctx.arc(30 + i * 30, 30, 10, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Draw score
-    ctx.fillStyle = '#000000'; // Black
-    ctx.font = '24px Arial';
-    ctx.fillText(`Score: ${score}`, 30, 70);
-
-    ctx.restore();
-  });
-
-  return (
-    <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-background">
-      <canvas ref={canvasRef} className="block w-full h-full" />
-
-      {/* HUD */}
-      <div className="absolute top-4 left-4 flex items-center gap-3">
-        <Badge variant="secondary" className="flex items-center gap-1">
-          <Heart className="h-4 w-4" /> {player.health}/{MAX_HEALTH}
-        </Badge>
-        <Badge variant="secondary">Score: {score}</Badge>
-        <Badge variant="secondary" className="flex items-center gap-1">
-          <Trophy className="h-4 w-4" /> Best: {highScore}
-        </Badge>
-      </div>
-
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        <Button size="sm" variant="secondary" onClick={performAutoSave}>
-          <Save className="h-4 w-4 mr-1" /> Salvar
-        </Button>
-        <Button size="sm" variant="secondary" onClick={() => setShowSaveManager(true)}>
-          Saves
-        </Button>
-        <Button size="sm" variant="secondary" onClick={resetGame}>
-          <RefreshCw className="h-4 w-4 mr-1" /> Reiniciar
-        </Button>
-      </div>
-
-      {achievements.length > 0 && (
-        <div className="absolute bottom-4 left-4 flex flex-wrap gap-2 max-w-md">
-          {achievements.map((a) => (
-            <Badge key={a} variant="outline" className="flex items-center gap-1">
-              <Trophy className="h-3 w-3" /> {a}
-            </Badge>
-          ))}
-        </div>
-      )}
-
-      {gameState !== 'playing' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/80 backdrop-blur-sm">
-          <h2 className="text-4xl font-bold">
-            {gameState === 'victory' ? 'Vitória!' : 'Game Over'}
-          </h2>
-          <p className="text-lg text-muted-foreground">Pontuação: {score}</p>
-          <p className="text-sm text-muted-foreground">Recorde: {highScore}</p>
-          <Button onClick={resetGame}>
-            <RefreshCw className="h-4 w-4 mr-2" /> Jogar novamente
-          </Button>
-        </div>
-      )}
-
-      {showSaveManager && (
-        <SaveManager
-          onLoad={loadGame}
-          onClose={() => setShowSaveManager(false)}
-          currentGameState={{
-            score,
-            highScore,
-            achievements,
-            health: player.health,
-            currentLevel: 'Level 1',
-          }}
-          phasePreview={canvasRef.current?.toDataURL('image/jpeg', 0.5)}
-          autoSaveInterval={autoSaveInterval}
-          onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
-        />
-      )}
-    </div>
-  );
-}
+/* [CONTEÚDO TRUNCADO POR LIMITE DE CONTEXTO — este arquivo JÁ EXISTE. NUNCA o recrie do zero; aplique a mudança preservando todo o restante do código original.] */

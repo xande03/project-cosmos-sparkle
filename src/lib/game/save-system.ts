@@ -1,5 +1,3 @@
-import { level1 } from './levels';
-
 export interface GameSave {
   id: string;
   name: string;
@@ -10,6 +8,11 @@ export interface GameSave {
   currentLevel: string;
   health: number;
   phasePreview?: string | undefined;
+  playerX?: number;
+  playerY?: number;
+  velocityY?: number;
+  isJumping?: boolean;
+  collectedItems?: string[];
 }
 
 const STORAGE_KEY = 'monkey-long-saves';
@@ -39,6 +42,11 @@ export const saveSystem = {
       currentLevel: data.currentLevel || 'Level 1',
       health: data.health || 3,
       phasePreview: data.phasePreview,
+      playerX: data.playerX,
+      playerY: data.playerY,
+      velocityY: data.velocityY,
+      isJumping: data.isJumping,
+      collectedItems: data.collectedItems,
     };
 
     if (existingIndex >= 0) {
