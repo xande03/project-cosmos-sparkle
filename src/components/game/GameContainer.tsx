@@ -399,13 +399,13 @@ export default function GameContainer() {
     level1.trees?.forEach((tree) => {
       // Tree trunk
       ctx.fillStyle = '#654321'; // Dark brown
-      ctx.fillRect(tree.position.x, tree.position.y, tree.size.width, tree.size.height);
+      ctx.fillRect(tree.position.x, tree.position.y, tree.size.x, tree.size.y);
       
       // Tree leaves (canopy)
       ctx.fillStyle = '#228B22'; // Forest green
       ctx.beginPath();
       ctx.arc(
-        tree.position.x + tree.size.width / 2,
+        tree.position.x + tree.size.x / 2,
         tree.position.y - 20,
         30,
         0,
@@ -421,7 +421,7 @@ export default function GameContainer() {
       ctx.arc(
         bird.position.x,
         bird.position.y,
-        bird.size.width / 2,
+        bird.size.x / 2,
         0,
         Math.PI * 2
       );
@@ -429,15 +429,15 @@ export default function GameContainer() {
       
       // Draw wings
       ctx.beginPath();
-      ctx.moveTo(bird.position.x - bird.size.width / 2, bird.position.y);
-      ctx.lineTo(bird.position.x - bird.size.width, bird.position.y - 10);
-      ctx.lineTo(bird.position.x - bird.size.width, bird.position.y + 10);
+      ctx.moveTo(bird.position.x - bird.size.x / 2, bird.position.y);
+      ctx.lineTo(bird.position.x - bird.size.x, bird.position.y - 10);
+      ctx.lineTo(bird.position.x - bird.size.x, bird.position.y + 10);
       ctx.fill();
       
       ctx.beginPath();
-      ctx.moveTo(bird.position.x + bird.size.width / 2, bird.position.y);
-      ctx.lineTo(bird.position.x + bird.size.width, bird.position.y - 10);
-      ctx.lineTo(bird.position.x + bird.size.width, bird.position.y + 10);
+      ctx.moveTo(bird.position.x + bird.size.x / 2, bird.position.y);
+      ctx.lineTo(bird.position.x + bird.size.x, bird.position.y - 10);
+      ctx.lineTo(bird.position.x + bird.size.x, bird.position.y + 10);
       ctx.fill();
     });
 
@@ -499,5 +499,74 @@ export default function GameContainer() {
     ctx.fillText(`Score: ${score}`, 30, 70);
 
     ctx.restore();
+  });
 
-/* [CONTEÚDO TRUNCADO POR LIMITE DE CONTEXTO — este arquivo JÁ EXISTE. NUNCA o recrie do zero; aplique a mudança preservando todo o restante do código original.] */
+  return (
+    <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-background">
+      <canvas ref={canvasRef} className="block w-full h-full" />
+
+      {/* HUD */}
+      <div className="absolute top-4 left-4 flex items-center gap-3">
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Heart className="h-4 w-4" /> {player.health}/{MAX_HEALTH}
+        </Badge>
+        <Badge variant="secondary">Score: {score}</Badge>
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Trophy className="h-4 w-4" /> Best: {highScore}
+        </Badge>
+      </div>
+
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <Button size="sm" variant="secondary" onClick={performAutoSave}>
+          <Save className="h-4 w-4 mr-1" /> Salvar
+        </Button>
+        <Button size="sm" variant="secondary" onClick={() => setShowSaveManager(true)}>
+          Saves
+        </Button>
+        <Button size="sm" variant="secondary" onClick={resetGame}>
+          <RefreshCw className="h-4 w-4 mr-1" /> Reiniciar
+        </Button>
+      </div>
+
+      {achievements.length > 0 && (
+        <div className="absolute bottom-4 left-4 flex flex-wrap gap-2 max-w-md">
+          {achievements.map((a) => (
+            <Badge key={a} variant="outline" className="flex items-center gap-1">
+              <Trophy className="h-3 w-3" /> {a}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      {gameState !== 'playing' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/80 backdrop-blur-sm">
+          <h2 className="text-4xl font-bold">
+            {gameState === 'victory' ? 'Vitória!' : 'Game Over'}
+          </h2>
+          <p className="text-lg text-muted-foreground">Pontuação: {score}</p>
+          <p className="text-sm text-muted-foreground">Recorde: {highScore}</p>
+          <Button onClick={resetGame}>
+            <RefreshCw className="h-4 w-4 mr-2" /> Jogar novamente
+          </Button>
+        </div>
+      )}
+
+      {showSaveManager && (
+        <SaveManager
+          onLoad={loadGame}
+          onClose={() => setShowSaveManager(false)}
+          currentGameState={{
+            score,
+            highScore,
+            achievements,
+            health: player.health,
+            currentLevel: 'Level 1',
+          }}
+          phasePreview={canvasRef.current?.toDataURL('image/jpeg', 0.5)}
+          autoSaveInterval={autoSaveInterval}
+          onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
+        />
+      )}
+    </div>
+  );
+}
