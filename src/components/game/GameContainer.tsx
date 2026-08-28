@@ -13,15 +13,16 @@ const JUMP_FORCE = -700;
 const MOVE_SPEED = 300;
 const FRICTION = 0.8;
 const MAX_HEALTH = 3;
+const DESIGN_WIDTH = 900;
+const DESIGN_HEIGHT = 600;
 const STORAGE_KEY_ACHIEVEMENTS = 'monkey-long-achievements';
 const STORAGE_KEY_HIGHSCORE = 'monkey-long-highscore';
 const STORAGE_KEY_AUTOSAVE_INTERVAL = 'monkey-long-autosave-interval';
-const CANVAS_WIDTH = 900;
-const CANVAS_HEIGHT = 600;
 
 export default function GameContainer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const playAreaRef = useRef<HTMLDivElement>(null);
 
   const [gameState, setGameState] = useState<'playing' | 'gameover' | 'victory'>('playing');
   const [player, setPlayer] = useState({
@@ -46,14 +47,16 @@ export default function GameContainer() {
   const [showSaveManager, setShowSaveManager] = useState(false);
   const [lastAutoSaveTime, setLastAutoSaveTime] = useState(Date.now());
   const [autoSaveInterval, setAutoSaveInterval] = useState(60000);
+  const [canvasScale, setCanvasScale] = useState(1);
+  const [canvasCssSize, setCanvasCssSize] = useState({ width: DESIGN_WIDTH, height: DESIGN_HEIGHT });
 
   const keys = useRef<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
-      canvas.width = CANVAS_WIDTH;
-      canvas.height = CANVAS_HEIGHT;
+      canvas.width = DESIGN_WIDTH;
+      canvas.height = DESIGN_HEIGHT;
     }
 
     const savedAchievements = localStorage.getItem(STORAGE_KEY_ACHIEVEMENTS);
@@ -75,6 +78,45 @@ export default function GameContainer() {
     if (savedAutoSaveInterval) {
       setAutoSaveInterval(parseInt(savedAutoSaveInterval, 10) || 60000);
     }
+  }, []);
+
+  // Redimensiona o canvas para ocupar ao máximo a tela, mantendo a proporção 3:2 do mundo do jogo.
+  useEffect(() => {
+    const playArea = playAreaRef.current;
+    const canvas = canvasRef.current;
+    if (!playArea || !canvas) return;
+
+    const resize = () => {
+      const rect = playArea.getBoundingClientRect();
+      const availableWidth = Math.max(rect.width, 320);
+      const availableHeight = Math.max(rect.height, 240);
+      const aspectRatio = DESIGN_WIDTH / DESIGN_HEIGHT;
+
+      let cssWidth = availableWidth;
+      let cssHeight = cssWidth / aspectRatio;
+      if (cssHeight > availableHeight) {
+        cssHeight = availableHeight;
+        cssWidth = cssHeight * aspectRatio;
+      }
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const pixelWidth = Math.round(cssWidth * dpr);
+      const pixelHeight = Math.round(cssHeight * dpr);
+
+      canvas.width = pixelWidth;
+      canvas.height = pixelHeight;
+      setCanvasScale(pixelWidth / DESIGN_WIDTH);
+      setCanvasCssSize({ width: cssWidth, height: cssHeight });
+    };
+
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(playArea);
+    window.addEventListener('resize', resize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', resize);
+    };
   }, []);
 
   const resetGame = () => {
@@ -367,8 +409,8 @@ export default function GameContainer() {
 
       // Camera
       setCameraX(() => {
-        const target = player.x - CANVAS_WIDTH / 2 + player.width / 2;
-        return Math.max(0, Math.min(target, level1.width - CANVAS_WIDTH));
+        const target = player.x - DESIGN_WIDTH / 2 + player.width / 2;
+        return Math.max(0, Math.min(target, level1.width - DESIGN_WIDTH));
       });
     },
     [gameState, enemies, player.x, player.y, player.width, player.height],
@@ -376,21 +418,23 @@ export default function GameContainer() {
 
   useGameLoop(update);
 
-  // Rendering
+  // Rendering em tela cheia (escala o mundo 900x600 para o tamanho do canvas)
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const sky = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+    const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
     sky.addColorStop(0, '#7fd7f5');
     sky.addColorStop(1, '#d9f6c8');
     ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
+    ctx.scale(canvasScale, canvasScale);
     ctx.translate(-cameraX, 0);
 
     // Platforms
@@ -443,15 +487,18 @@ export default function GameContainer() {
     }
 
     ctx.restore();
-  }, [player, enemies, collectibles, cameraX]);
+  }, [player, enemies, collectibles, cameraX, canvasScale]);
 
   const handleManualSave = () => {
     performAutoSave();
   };
 
   return (
-    <div ref={containerRef} className="relative mx-auto w-full max-w-[900px]">
-      <div className="mb-3 flex flex-wrap items-center gap-3">
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-sky-300 via-sky-100 to-emerald-100"
+    >
+      <div className="flex flex-wrap items-center gap-3 px-3 py-2 sm:px-4 sm:py-3">
         <div className="flex items-center gap-1">
           {Array.from({ length: MAX_HEALTH }).map((_, i) => (
             <Heart
@@ -466,7 +513,7 @@ export default function GameContainer() {
         <Badge variant="outline">
           <Trophy className="mr-1 h-3 w-3" /> Recorde: {highScore}
         </Badge>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex flex-wrap gap-2">
           <Button size="sm" variant="outline" onClick={handleManualSave}>
             <Save className="mr-1 h-4 w-4" /> Salvar agora
           </Button>
@@ -479,25 +526,37 @@ export default function GameContainer() {
         </div>
       </div>
 
-      <div className="relative overflow-hidden rounded-lg border border-border shadow-lg">
-        <canvas ref={canvasRef} className="block w-full" />
+      <div
+        ref={playAreaRef}
+        className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-2 sm:px-3 sm:pb-3"
+      >
+        <div
+          className="relative overflow-hidden rounded-xl border border-border shadow-2xl"
+          style={{ width: canvasCssSize.width, height: canvasCssSize.height }}
+        >
+          <canvas
+            ref={canvasRef}
+            className="block"
+            style={{ width: canvasCssSize.width, height: canvasCssSize.height }}
+          />
 
-        {gameState !== 'playing' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/85 text-center">
-            <h2 className="text-3xl font-bold">
-              {gameState === 'victory' ? 'Vitória!' : 'Game Over'}
-            </h2>
-            <p className="text-muted-foreground">Pontuação final: {score}</p>
-            {score >= highScore && score > 0 && <Badge>Novo recorde!</Badge>}
-            <Button onClick={resetGame}>
-              <RefreshCw className="mr-2 h-4 w-4" /> Jogar novamente
-            </Button>
-          </div>
-        )}
+          {gameState !== 'playing' && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/85 text-center">
+              <h2 className="text-3xl font-bold">
+                {gameState === 'victory' ? 'Vitória!' : 'Game Over'}
+              </h2>
+              <p className="text-muted-foreground">Pontuação final: {score}</p>
+              {score >= highScore && score > 0 && <Badge>Novo recorde!</Badge>}
+              <Button onClick={resetGame}>
+                <RefreshCw className="mr-2 h-4 w-4" /> Jogar novamente
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       {achievements.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 px-3 pb-2 sm:px-4 sm:pb-3">
           {achievements.map((a) => (
             <Badge key={a} variant="secondary">
               <Trophy className="mr-1 h-3 w-3" /> {a}
