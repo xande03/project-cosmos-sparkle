@@ -14,8 +14,12 @@ export default function SplashScreen() {
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/splashscreen-bg.jpg')" }}>
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div className="absolute inset-0 bg-black">
+        <img 
+          src="/images/logo-npontes.png" 
+          alt="N.PONTES" 
+          className="w-full h-full object-contain p-12"
+        />
       </div>
       
       <div className="text-center relative z-10">
