@@ -399,13 +399,13 @@ export default function GameContainer() {
     level1.trees?.forEach((tree) => {
       // Tree trunk
       ctx.fillStyle = '#654321'; // Dark brown
-      ctx.fillRect(tree.position.x, tree.position.y, tree.size.width, tree.size.height);
+      ctx.fillRect(tree.position.x, tree.position.y, tree.size.x, tree.size.y);
       
       // Tree leaves (canopy)
       ctx.fillStyle = '#228B22'; // Forest green
       ctx.beginPath();
       ctx.arc(
-        tree.position.x + tree.size.width / 2,
+        tree.position.x + tree.size.x / 2,
         tree.position.y - 20,
         30,
         0,
@@ -421,7 +421,7 @@ export default function GameContainer() {
       ctx.arc(
         bird.position.x,
         bird.position.y,
-        bird.size.width / 2,
+        bird.size.x / 2,
         0,
         Math.PI * 2
       );
@@ -429,15 +429,15 @@ export default function GameContainer() {
       
       // Draw wings
       ctx.beginPath();
-      ctx.moveTo(bird.position.x - bird.size.width / 2, bird.position.y);
-      ctx.lineTo(bird.position.x - bird.size.width, bird.position.y - 10);
-      ctx.lineTo(bird.position.x - bird.size.width, bird.position.y + 10);
+      ctx.moveTo(bird.position.x - bird.size.x / 2, bird.position.y);
+      ctx.lineTo(bird.position.x - bird.size.x, bird.position.y - 10);
+      ctx.lineTo(bird.position.x - bird.size.x, bird.position.y + 10);
       ctx.fill();
       
       ctx.beginPath();
-      ctx.moveTo(bird.position.x + bird.size.width / 2, bird.position.y);
-      ctx.lineTo(bird.position.x + bird.size.width, bird.position.y - 10);
-      ctx.lineTo(bird.position.x + bird.size.width, bird.position.y + 10);
+      ctx.moveTo(bird.position.x + bird.size.x / 2, bird.position.y);
+      ctx.lineTo(bird.position.x + bird.size.x, bird.position.y - 10);
+      ctx.lineTo(bird.position.x + bird.size.x, bird.position.y + 10);
       ctx.fill();
     });
 
