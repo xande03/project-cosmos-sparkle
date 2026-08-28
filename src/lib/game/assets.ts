@@ -18,7 +18,7 @@ export const GameAssets = {
       size: { width: 800, height: 200 },
     },
   },
-  Cloud: {
+  Clouds: {
     component: Clouds,
     props: {
       position: { x: 200, y: 50 },
