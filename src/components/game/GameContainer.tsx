@@ -47,8 +47,8 @@ export default function GameContainer() {
   const [showSaveManager, setShowSaveManager] = useState(false);
   const [lastAutoSaveTime, setLastAutoSaveTime] = useState(Date.now());
   const [autoSaveInterval, setAutoSaveInterval] = useState(60000);
-  const [canvasScale, setCanvasScale] = useState(1);
-  const [canvasCssSize, setCanvasCssSize] = useState({ width: DESIGN_WIDTH, height: DESIGN_HEIGHT });
+  const [canvasScaleX, setCanvasScaleX] = useState(1);
+  const [canvasScaleY, setCanvasScaleY] = useState(1);
 
   const keys = useRef<{ [key: string]: boolean }>({});
 
@@ -80,7 +80,8 @@ export default function GameContainer() {
     }
   }, []);
 
-  // Redimensiona o canvas para ocupar ao máximo a tela, mantendo a proporção 3:2 do mundo do jogo.
+  // Redimensiona o canvas para cobrir 100% da área da tela, esticando o mundo
+  // 900x600 para preencher toda a viewport sem barras pretas nas laterais.
   useEffect(() => {
     const playArea = playAreaRef.current;
     const canvas = canvasRef.current;
@@ -90,23 +91,15 @@ export default function GameContainer() {
       const rect = playArea.getBoundingClientRect();
       const availableWidth = Math.max(rect.width, 320);
       const availableHeight = Math.max(rect.height, 240);
-      const aspectRatio = DESIGN_WIDTH / DESIGN_HEIGHT;
-
-      let cssWidth = availableWidth;
-      let cssHeight = cssWidth / aspectRatio;
-      if (cssHeight > availableHeight) {
-        cssHeight = availableHeight;
-        cssWidth = cssHeight * aspectRatio;
-      }
-
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const pixelWidth = Math.round(cssWidth * dpr);
-      const pixelHeight = Math.round(cssHeight * dpr);
+
+      const pixelWidth = Math.round(availableWidth * dpr);
+      const pixelHeight = Math.round(availableHeight * dpr);
 
       canvas.width = pixelWidth;
       canvas.height = pixelHeight;
-      setCanvasScale(pixelWidth / DESIGN_WIDTH);
-      setCanvasCssSize({ width: cssWidth, height: cssHeight });
+      setCanvasScaleX(pixelWidth / DESIGN_WIDTH);
+      setCanvasScaleY(pixelHeight / DESIGN_HEIGHT);
     };
 
     resize();
@@ -418,7 +411,7 @@ export default function GameContainer() {
 
   useGameLoop(update);
 
-  // Rendering em tela cheia (escala o mundo 900x600 para o tamanho do canvas)
+  // Renderiza o mundo do jogo em tela cheia
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -434,7 +427,7 @@ export default function GameContainer() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
-    ctx.scale(canvasScale, canvasScale);
+    ctx.scale(canvasScaleX, canvasScaleY);
     ctx.translate(-cameraX, 0);
 
     // Platforms
@@ -597,7 +590,7 @@ export default function GameContainer() {
     }
 
     ctx.restore();
-  }, [player, enemies, collectibles, cameraX, canvasScale]);
+  }, [player, enemies, collectibles, cameraX, canvasScaleX, canvasScaleY]);
 
   const handleManualSave = () => {
     performAutoSave();
@@ -606,9 +599,28 @@ export default function GameContainer() {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-sky-300 via-sky-100 to-emerald-100"
+      className="fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-sky-300 via-sky-100 to-emerald-100"
     >
-      <div className="flex flex-wrap items-center gap-3 px-3 py-2 sm:px-4 sm:py-3">
+      {/* Área do jogo em tela cheia — cobre toda a janela */}
+      <div ref={playAreaRef} className="absolute inset-0">
+        <canvas ref={canvasRef} className="block h-full w-full" />
+
+        {gameState !== 'playing' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/85 text-center">
+            <h2 className="text-3xl font-bold">
+              {gameState === 'victory' ? 'Vitória!' : 'Game Over'}
+            </h2>
+            <p className="text-muted-foreground">Pontuação final: {score}</p>
+            {score >= highScore && score > 0 && <Badge>Novo recorde!</Badge>}
+            <Button onClick={resetGame}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Jogar novamente
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* HUD flutuante sobre o jogo */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-wrap items-center gap-3 bg-gradient-to-b from-black/40 via-black/20 to-transparent px-3 py-2 sm:px-4 sm:py-3">
         <div className="flex items-center gap-1">
           {Array.from({ length: MAX_HEALTH }).map((_, i) => (
             <Heart
@@ -623,7 +635,7 @@ export default function GameContainer() {
         <Badge variant="outline">
           <Trophy className="mr-1 h-3 w-3" /> Recorde: {highScore}
         </Badge>
-        <div className="ml-auto flex flex-wrap gap-2">
+        <div className="pointer-events-auto ml-auto flex flex-wrap gap-2">
           <Button size="sm" variant="outline" onClick={handleManualSave}>
             <Save className="mr-1 h-4 w-4" /> Salvar agora
           </Button>
@@ -636,37 +648,9 @@ export default function GameContainer() {
         </div>
       </div>
 
-      <div
-        ref={playAreaRef}
-        className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-2 sm:px-3 sm:pb-3"
-      >
-        <div
-          className="relative overflow-hidden rounded-xl border border-border shadow-2xl"
-          style={{ width: canvasCssSize.width, height: canvasCssSize.height }}
-        >
-          <canvas
-            ref={canvasRef}
-            className="block"
-            style={{ width: canvasCssSize.width, height: canvasCssSize.height }}
-          />
-
-          {gameState !== 'playing' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/85 text-center">
-              <h2 className="text-3xl font-bold">
-                {gameState === 'victory' ? 'Vitória!' : 'Game Over'}
-              </h2>
-              <p className="text-muted-foreground">Pontuação final: {score}</p>
-              {score >= highScore && score > 0 && <Badge>Novo recorde!</Badge>}
-              <Button onClick={resetGame}>
-                <RefreshCw className="mr-2 h-4 w-4" /> Jogar novamente
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-
+      {/* Conquistas flutuantes na parte inferior */}
       {achievements.length > 0 && (
-        <div className="flex flex-wrap gap-2 px-3 pb-2 sm:px-4 sm:pb-3">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-wrap gap-2 bg-gradient-to-t from-black/30 to-transparent px-3 pb-2 sm:px-4 sm:pb-3">
           {achievements.map((a) => (
             <Badge key={a} variant="secondary">
               <Trophy className="mr-1 h-3 w-3" /> {a}
