@@ -628,6 +628,14 @@ export default function GameContainer() {
             <SaveManager
               onLoad={loadGame}
               onClose={() => setShowSaveManager(false)}
+              currentGameState={{
+                score,
+                highScore,
+                achievements,
+                health: player.health,
+                currentLevel: 'Level 1',
+              }}
+              phasePreview={canvasRef.current?.toDataURL('image/jpeg', 0.5)}
               autoSaveInterval={autoSaveInterval}
               onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
             />
