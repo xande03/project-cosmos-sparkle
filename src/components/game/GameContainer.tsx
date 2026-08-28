@@ -8,9 +8,9 @@ import SaveManager from './save-management/SaveManager';
 import { GameSave, saveSystem } from '@/lib/game/save-system';
 import { toast } from 'sonner';
 
-const GRAVITY = 1200;
-const JUMP_FORCE = -550;
-const MOVE_SPEED = 250;
+const GRAVITY = 1500;
+const JUMP_FORCE = -700;
+const MOVE_SPEED = 300;
 const FRICTION = 0.8;
 const MAX_HEALTH = 3;
 const STORAGE_KEY_ACHIEVEMENTS = 'monkey-long-achievements';
@@ -310,21 +310,14 @@ export default function GameContainer() {
         }
 
         // Death by falling
-        if (newY > LOGICAL_HEIGHT + 100) {
+        if (newY > 700) {
           newHealth -= 1;
           newX = 100;
-          newY = 300;
+          newY = 400;
           newVx = 0;
           newVy = 0;
-          newInvulnerable = 2.0;
           if (newHealth <= 0) {
             setGameState('gameover');
-            if (score > highScore) {
-              setHighScore(score);
-              localStorage.setItem(STORAGE_KEY_HIGHSCORE, score.toString());
-            }
-          } else {
-            toast.error('Você caiu! -1 vida', { duration: 2000 });
           }
         }
 
@@ -394,177 +387,221 @@ export default function GameContainer() {
 
     ctx.translate(-cameraX, 0);
 
-    // Sky gradient
-    const sky = ctx.createLinearGradient(cameraX, 0, cameraX, LOGICAL_HEIGHT);
-    sky.addColorStop(0, '#7ec8e3');
-    sky.addColorStop(1, '#c9e8f5');
-    ctx.fillStyle = sky;
+    // Sky
+    ctx.fillStyle = '#BAE6FD';
     ctx.fillRect(cameraX, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
-    // Trees (background decoration)
-    level1.trees?.forEach((t) => {
-      ctx.fillStyle = '#5d4037';
-      ctx.fillRect(
-        t.position.x + t.size.x / 2 - 6,
-        t.position.y + t.size.y * 0.4,
-        12,
-        t.size.y * 0.6,
-      );
-      ctx.fillStyle = '#2e7d32';
-      ctx.beginPath();
-      ctx.arc(t.position.x + t.size.x / 2, t.position.y + t.size.y * 0.3, t.size.x / 1.6, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // Birds
-    ctx.fillStyle = '#37474f';
-    level1.birds?.forEach((b) => {
-      const bx = b.position.x + ((Date.now() / 1000) * (b.speed ?? 2) * 40) % (level1.width + 200) - 100;
-      const by = b.position.y + Math.sin(Date.now() / 300 + b.position.x) * 10;
-      ctx.beginPath();
-      ctx.ellipse(bx, by, b.size.x / 2, b.size.y / 3, 0, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
     // Platforms
+    ctx.fillStyle = '#65A30D';
     level1.platforms.forEach((p) => {
-      ctx.fillStyle = '#6d4c41';
-      ctx.fillRect(p.position.x, p.position.y, p.size.x, p.size.y);
-      ctx.fillStyle = '#43a047';
-      ctx.fillRect(p.position.x, p.position.y, p.size.x, Math.min(8, p.size.y));
+      ctx.beginPath();
+      ctx.roundRect(p.position.x, p.position.y, p.size.x, p.size.y, 8);
+      ctx.fill();
     });
 
-    // Obstacles (spikes)
+    // Obstacles (Spikes)
+    ctx.fillStyle = '#EF4444';
     level1.obstacles.forEach((o) => {
-      ctx.fillStyle = '#c62828';
-      const spikes = 3;
-      const w = o.size.x / spikes;
-      for (let i = 0; i < spikes; i++) {
+      ctx.beginPath();
+      ctx.moveTo(o.position.x, o.position.y + o.size.y);
+      ctx.lineTo(o.position.x + o.size.x / 2, o.position.y);
+      ctx.lineTo(o.position.x + o.size.x, o.position.y + o.size.y);
+      ctx.fill();
+    });
+
+    // Enemies (Crabs/Monsters)
+    ctx.fillStyle = '#991B1B';
+    enemies.forEach((e) => {
+      ctx.beginPath();
+      ctx.roundRect(e.position.x, e.position.y, e.size.x, e.size.y, 4);
+      ctx.fill();
+      // Eyes
+      ctx.fillStyle = 'white';
+      ctx.fillRect(e.position.x + 5, e.position.y + 5, 5, 5);
+      ctx.fillRect(e.position.x + e.size.x - 10, e.position.y + 5, 5, 5);
+      ctx.fillStyle = '#991B1B';
+    });
+
+    // Collectibles
+    ctx.fillStyle = '#FACC15';
+    collectibles.forEach((c) => {
+      if (c.active) {
         ctx.beginPath();
-        ctx.moveTo(o.position.x + i * w, o.position.y + o.size.y);
-        ctx.lineTo(o.position.x + i * w + w / 2, o.position.y);
-        ctx.lineTo(o.position.x + (i + 1) * w, o.position.y + o.size.y);
-        ctx.closePath();
+        ctx.arc(c.position.x + 15, c.position.y + 15, 12, 0, Math.PI * 2);
         ctx.fill();
       }
     });
 
-    // Enemies
-    enemies.forEach((e) => {
-      ctx.fillStyle = '#7b1fa2';
-      ctx.fillRect(e.position.x, e.position.y, e.size.x, e.size.y);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(e.position.x + 8, e.position.y + 10, 8, 8);
-      ctx.fillRect(e.position.x + e.size.x - 16, e.position.y + 10, 8, 8);
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(e.position.x + 10, e.position.y + 12, 4, 4);
-      ctx.fillRect(e.position.x + e.size.x - 14, e.position.y + 12, 4, 4);
-    });
+    // Goal
+    ctx.fillStyle = '#8B5CF6';
+    ctx.fillRect(level1.goal.position.x, level1.goal.position.y, level1.goal.size.x, level1.goal.size.y);
 
-    // Collectibles (bananas)
-    collectibles.forEach((c) => {
-      if (!c.active) return;
-      ctx.fillStyle = '#fdd835';
-      ctx.beginPath();
-      ctx.arc(
-        c.position.x + c.size.x / 2,
-        c.position.y + c.size.y / 2,
-        c.size.x / 2,
-        0,
-        Math.PI * 2,
-      );
-      ctx.fill();
-      ctx.strokeStyle = '#f9a825';
+    // Player — Monkey (Donkey Kong style)
+    if (player.invulnerable <= 0 || Math.floor(Date.now() / 100) % 2 === 0) {
+      const cx = player.x + player.width / 2;
+
+      // Tail (curled behind)
+      ctx.strokeStyle = '#78350F';
       ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(player.x + 8, player.y + 24);
+      ctx.quadraticCurveTo(player.x - 8, player.y + 20, player.x - 3, player.y + 10);
       ctx.stroke();
-    });
 
-    // Goal flag
-    ctx.fillStyle = '#5d4037';
-    ctx.fillRect(level1.goal.position.x + 5, level1.goal.position.y, 6, level1.goal.size.y);
-    ctx.fillStyle = '#ffb300';
-    ctx.beginPath();
-    ctx.moveTo(level1.goal.position.x + 11, level1.goal.position.y);
-    ctx.lineTo(level1.goal.position.x + level1.goal.size.x, level1.goal.position.y + 18);
-    ctx.lineTo(level1.goal.position.x + 11, level1.goal.position.y + 36);
-    ctx.closePath();
-    ctx.fill();
+      // Legs
+      ctx.fillStyle = '#78350F';
+      ctx.beginPath();
+      ctx.roundRect(player.x + 8, player.y + 30, 10, 9, 3);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(player.x + 22, player.y + 30, 10, 9, 3);
+      ctx.fill();
 
-    // Player (monkey) — blinks while invulnerable
-    const blink = player.invulnerable > 0 && Math.floor(Date.now() / 100) % 2 === 0;
-    if (!blink) {
-      ctx.fillStyle = '#8d6e63';
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-      ctx.fillStyle = '#d7ccc8';
-      ctx.fillRect(player.x + 6, player.y + 12, player.width - 12, player.height - 20);
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(player.x + 10, player.y + 8, 5, 5);
-      ctx.fillRect(player.x + player.width - 15, player.y + 8, 5, 5);
+      // Feet
+      ctx.fillStyle = '#44403C';
+      ctx.beginPath();
+      ctx.roundRect(player.x + 5, player.y + 36, 13, 4, 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(player.x + 22, player.y + 36, 13, 4, 2);
+      ctx.fill();
+
+      // Body
+      ctx.fillStyle = '#78350F';
+      ctx.beginPath();
+      ctx.roundRect(player.x + 6, player.y + 14, 28, 20, 5);
+      ctx.fill();
+
+      // Belly
+      ctx.fillStyle = '#A16207';
+      ctx.beginPath();
+      ctx.roundRect(player.x + 12, player.y + 20, 16, 10, 3);
+      ctx.fill();
+
+      // Arms
+      ctx.fillStyle = '#78350F';
+      ctx.beginPath();
+      ctx.roundRect(player.x - 4, player.y + 18, 8, 6, 3);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(player.x + 36, player.y + 18, 8, 6, 3);
+      ctx.fill();
+
+      // Head
+      ctx.fillStyle = '#78350F';
+      ctx.beginPath();
+      ctx.arc(cx, player.y + 6, 14, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ears
+      ctx.fillStyle = '#A16207';
+      ctx.beginPath();
+      ctx.arc(cx - 12, player.y + 4, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 12, player.y + 4, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Face
+      ctx.fillStyle = '#A16207';
+      ctx.beginPath();
+      ctx.arc(cx, player.y + 8, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(cx - 4, player.y + 5, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 4, player.y + 5, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#1C1917';
+      ctx.beginPath();
+      ctx.arc(cx - 4, player.y + 5, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 4, player.y + 5, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Nose
+      ctx.fillStyle = '#78350F';
+      ctx.beginPath();
+      ctx.ellipse(cx, player.y + 9, 2, 1.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mouth
+      ctx.strokeStyle = '#1C1917';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, player.y + 12, 3, 0, Math.PI);
+      ctx.stroke();
+
+      // Red tie (cosmetic)
+      ctx.fillStyle = '#DC2626';
+      ctx.beginPath();
+      ctx.moveTo(cx - 2, player.y + 16);
+      ctx.lineTo(cx + 2, player.y + 16);
+      ctx.lineTo(cx, player.y + 22);
+      ctx.fill();
     }
 
     ctx.restore();
   });
 
   return (
-    <div ref={containerRef} className="relative w-screen h-screen overflow-hidden bg-stone-900">
-      <canvas ref={canvasRef} className="block w-full h-full" />
-
+    <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden bg-gray-900">
       {/* HUD */}
-      <div className="absolute top-0 left-0 right-0 p-4 flex items-start justify-between pointer-events-none">
-        <div className="flex flex-col gap-2 pointer-events-auto">
-          <div className="flex items-center gap-1 bg-stone-900/70 rounded-full px-4 py-2">
-            {Array.from({ length: MAX_HEALTH }).map((_, i) => (
-              <Heart
-                key={i}
-                className={`w-5 h-5 ${i < player.health ? 'text-red-500 fill-red-500' : 'text-stone-600'}`}
-              />
-            ))}
-          </div>
-          <div className="flex items-center gap-2 bg-stone-900/70 rounded-full px-4 py-2 text-white font-bold">
-            <Trophy className="w-4 h-4 text-yellow-400" />
-            <span>{score}</span>
-            <span className="text-stone-400 text-sm">| Best: {highScore}</span>
-          </div>
-          {achievements.length > 0 && (
-            <div className="flex flex-wrap gap-1 max-w-xs">
-              {achievements.map((a) => (
-                <Badge key={a} className="bg-yellow-500 text-stone-900 font-bold">
-                  {a}
-                </Badge>
-              ))}
-            </div>
-          )}
+      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
+        <div className="flex items-center gap-2">
+          {Array.from({ length: player.health }, (_, i) => (
+            <Heart key={i} className="w-6 h-6 text-red-500 fill-red-500" />
+          ))}
         </div>
-
-        <div className="flex gap-2 pointer-events-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-stone-900/70 text-white border-stone-700 gap-2"
-            onClick={performAutoSave}
-          >
-            <Save className="w-4 h-4" /> Salvar
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-stone-900/70 text-white border-stone-700"
-            onClick={() => setShowSaveManager(true)}
-          >
-            Saves
-          </Button>
+        <div className="flex items-center gap-4">
+          <Badge variant="secondary" className="text-lg px-3 py-1">
+            Score: {score}
+          </Badge>
+          <Badge variant="outline" className="text-lg px-3 py-1 text-yellow-400 border-yellow-400">
+            <Trophy className="w-4 h-4 mr-1" />
+            {highScore}
+          </Badge>
+          <div className="flex gap-2 pointer-events-auto">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSaveManager(true)}
+              title="Gerenciar saves"
+              className="text-white hover:text-white"
+            >
+              <Save className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={resetGame}
+              title="Reiniciar jogo"
+              className="text-white hover:text-white"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
+      {/* Canvas */}
+      <canvas ref={canvasRef} className="block w-full h-full" />
+
       {/* Game Over */}
       {gameState === 'gameover' && (
-        <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-3xl p-10 text-center shadow-2xl">
-            <h2 className="text-4xl font-black text-red-600 uppercase italic mb-2">Game Over</h2>
-            <p className="text-stone-600 font-bold mb-1">Pontuação: {score}</p>
-            <p className="text-stone-400 text-sm mb-6">Recorde: {highScore}</p>
-            <Button onClick={resetGame} className="bg-stone-800 gap-2 rounded-xl">
-              <RefreshCw className="w-4 h-4" /> Reiniciar
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl font-bold text-red-500">Game Over</h2>
+            <p className="text-xl text-white">Pontuação: {score}</p>
+            <Button onClick={resetGame} variant="default" className="text-lg px-6 py-2">
+              Tentar Novamente
             </Button>
           </div>
         </div>
@@ -572,35 +609,36 @@ export default function GameContainer() {
 
       {/* Victory */}
       {gameState === 'victory' && (
-        <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-3xl p-10 text-center shadow-2xl">
-            <h2 className="text-4xl font-black text-green-600 uppercase italic mb-2">Vitória!</h2>
-            <p className="text-stone-600 font-bold mb-1">Pontuação: {score}</p>
-            <p className="text-stone-400 text-sm mb-6">Recorde: {highScore}</p>
-            <Button onClick={resetGame} className="bg-green-600 hover:bg-green-700 gap-2 rounded-xl">
-              <RefreshCw className="w-4 h-4" /> Jogar Novamente
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl font-bold text-yellow-400">Você Venceu!</h2>
+            <p className="text-xl text-white">Pontuação: {score}</p>
+            <p className="text-lg text-green-400">Conquista: Jungle Explorer</p>
+            <Button onClick={resetGame} variant="default" className="text-lg px-6 py-2">
+              Jogar Novamente
             </Button>
           </div>
         </div>
       )}
 
-      {/* Save Manager */}
+      {/* Save Manager Modal */}
       {showSaveManager && (
-        <SaveManager
-          onLoad={loadGame}
-          onClose={() => setShowSaveManager(false)}
-          currentGameState={{
-            score,
-            highScore,
-            achievements,
-            health: player.health,
-            currentLevel: 'Level 1',
-          }}
-          phasePreview={canvasRef.current?.toDataURL('image/jpeg', 0.5)}
-          autoSaveInterval={autoSaveInterval}
-          onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
-        />
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/50">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <SaveManager
+              onLoad={loadGame}
+              onClose={() => setShowSaveManager(false)}
+              autoSaveInterval={autoSaveInterval}
+              onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
+            />
+          </div>
+        </div>
       )}
+
+      {/* Controls hint */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-gray-400 text-sm">
+        Use as setas do teclado ou WASD para mover e pular. Espaço também pula.
+      </div>
     </div>
   );
 }

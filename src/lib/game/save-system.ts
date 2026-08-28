@@ -1,3 +1,5 @@
+import { level1 } from './levels';
+
 export interface GameSave {
   id: string;
   name: string;

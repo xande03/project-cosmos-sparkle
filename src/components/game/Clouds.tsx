@@ -18,33 +18,6 @@ function Cloud({ className }: CloudProps) {
   )
 }
 
-interface BirdProps {
-  className?: string
-}
-
-function Bird({ className }: BirdProps) {
-  return (
-    <div className={`bird ${className ?? ''}`}>
-      <div className="bird-body" />
-      <div className="bird-wing bird-wing-left" />
-      <div className="bird-wing bird-wing-right" />
-    </div>
-  )
-}
-
-interface TreeProps {
-  className?: string
-}
-
-function Tree({ className }: TreeProps) {
-  return (
-    <div className={`tree ${className ?? ''}`}>
-      <div className="tree-trunk" />
-      <div className="tree-foliage" />
-    </div>
-  )
-}
-
 export default function Clouds() {
   return (
     <div className="clouds">
@@ -55,21 +28,6 @@ export default function Clouds() {
       <Cloud className="cloud-4" />
       <Cloud className="cloud-5" />
       <Cloud className="cloud-6" />
-      
-      {/* Birds */}
-      <Bird className="bird-1" />
-      <Bird className="bird-2" />
-      <Bird className="bird-3" />
-      <Bird className="bird-4" />
-      <Bird className="bird-5" />
-      
-      {/* Trees */}
-      <Tree className="tree-1" />
-      <Tree className="tree-2" />
-      <Tree className="tree-3" />
-      <Tree className="tree-4" />
-      <Tree className="tree-5" />
-      <Tree className="tree-6" />
     </div>
   )
 }

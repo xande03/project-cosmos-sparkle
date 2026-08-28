@@ -12,7 +12,7 @@ export interface Player extends Entity {
 }
 
 export interface Enemy extends Entity {
-  type: 'patrol' | 'spike' | 'static';
+  type: 'patrol' | 'spike';
   range?: number;
   speed?: number;
   startPos?: Vector2;
@@ -26,6 +26,4 @@ export interface Level {
   enemies: Enemy[];
   collectibles: Entity[];
   goal: Entity;
-  trees?: Entity[];
-  birds?: (Entity & { speed?: number })[];
 }
