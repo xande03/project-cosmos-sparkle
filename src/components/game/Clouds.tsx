@@ -1,7 +1,5 @@
 import React from 'react'
 import './Clouds.css'
-import Birds from './Birds'
-import Tree from './Tree'
 
 interface CloudProps {
   className?: string
@@ -30,10 +28,6 @@ export default function Clouds() {
       <Cloud className="cloud-4" />
       <Cloud className="cloud-5" />
       <Cloud className="cloud-6" />
-      <Birds />
-      <Tree className="tree-1" style={{ position: 'absolute', bottom: '0' }} />
-      <Tree className="tree-2" style={{ position: 'absolute', bottom: '0' }} />
-      <Tree className="tree-3" style={{ position: 'absolute', bottom: '0' }} />
     </div>
   )
 }

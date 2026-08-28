@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
@@ -15,16 +14,41 @@ export default function SplashScreen() {
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          <div className="my-8 flex justify-center">
+          <div className="w-full flex justify-center">
+            <img
+              src="/HOMEM DE FERRO.png"
+              alt="HOMEM DE FERRO"
+              className="max-w-full h-auto rounded-lg"
+            />
+          </div>
+          <div className="w-full flex justify-center">
+            <img
+              src="/HOMEM DE FERRO.png"
+              alt="HOMEM DE FERRO"
+              className="max-w-full h-auto rounded-lg"
+            />
+          </div>
+          </div>
+
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1920&q=80')" }}>
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      </div>
+      
+      {/* Iron Man Image */}
+      <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2 z-20">
+        <img 
+          src="/HOMEM-DE-FERRO.png" 
+          alt="Iron Man" 
+          className="w-64 h-auto object-contain drop-shadow-2xl"
+        />
+      </div>
+      
       <div className="text-center relative z-10">
-        <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">bora jogar</h1>
+        <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">olá, jogadores</h1>
         <p className="text-xl text-white mb-8">Olá, players</p>
-        <Card className="bg-[#84cc16] border-[#84cc16] max-w-md mx-auto">
-          <CardContent className="p-6">
-            <p className="text-black text-lg mb-4 italic">"Porque onde estiver o vosso tesouro, aí estará também o vosso coração." - Mateus 6:21</p>
-          </CardContent>
-        </Card>
         <Button 
-          className="bg-lime-500 hover:bg-lime-600 text-black text-lg px-8 py-4 rounded-xl font-bold"
+          className="bg-yellow-500 hover:bg-yellow-600 text-black text-lg px-8 py-4 rounded-xl font-bold"
           onClick={() => setIsVisible(false)}
         >
           Começar a Jogar

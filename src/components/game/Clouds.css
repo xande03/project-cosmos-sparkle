@@ -103,165 +103,53 @@
   background: inherit;
 }
 
-/* Árvores */
-.trees {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 40vh;
-  pointer-events: none;
-  z-index: 5;
-  overflow: hidden;
+/* Variações de cada nuvem */
+.cloud-1 {
+  --top: 26px;
+  --left: 6%;
+  --scale: 1;
+  --duration: 58s;
+  --delay: -12s;
 }
 
-.tree {
-  position: absolute;
-  bottom: 0;
-  transform-origin: bottom center;
-}
-
-.tree-trunk {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 16px;
-  background: #8B4513;
-  border-radius: 4px 4px 0 0;
-}
-
-.tree-foliage {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 40px solid transparent;
-  border-right: 40px solid transparent;
-  border-bottom: 80px solid #2E8B57;
-  border-radius: 50%;
-}
-
-.tree-1 {
-  --left: 8%;
-  --scale: 1.2;
-  --height: 120px;
-}
-
-.tree-2 {
-  --left: 18%;
+.cloud-2 {
+  --top: 108px;
+  --left: 34%;
   --scale: 0.8;
-  --height: 80px;
+  --duration: 74s;
+  --delay: -32s;
 }
 
-.tree-3 {
-  --left: 28%;
-  --scale: 1.5;
-  --height: 150px;
+.cloud-3 {
+  --top: 52px;
+  --left: 56%;
+  --scale: 0.62;
+  --duration: 66s;
+  --delay: -48s;
 }
 
-.tree-4 {
-  --left: 38%;
-  --scale: 0.9;
-  --height: 90px;
+.cloud-4 {
+  --top: 130px;
+  --left: 14%;
+  --scale: 0.5;
+  --duration: 82s;
+  --delay: -8s;
 }
 
-.tree-5 {
-  --left: 48%;
-  --scale: 1.3;
-  --height: 130px;
-}
-
-.tree-6 {
-  --left: 58%;
-  --scale: 0.7;
-  --height: 70px;
-}
-
-.tree-7 {
-  --left: 68%;
-  --scale: 1.1;
-  --height: 110px;
-}
-
-.tree-8 {
-  --left: 78%;
-  --scale: 0.85;
-  --height: 85px;
-}
-
-.tree-9 {
-  --left: 88%;
-  --scale: 1.4;
-  --height: 140px;
-}
-
-.tree-10 {
-  --left: 95%;
-  --scale: 0.75;
-  --height: 75px;
-}
-
-.tree-11 {
-  --left: 12%;
-  --scale: 1.1;
-  --height: 110px;
-}
-
-.tree-12 {
-  --left: 22%;
-  --scale: 0.9;
-  --height: 90px;
-}
-
-.tree-13 {
-  --left: 32%;
-  --scale: 1.25;
-  --height: 125px;
-}
-
-.tree-14 {
-  --left: 42%;
-  --scale: 0.8;
-  --height: 80px;
-}
-
-.tree-15 {
-  --left: 52%;
-  --scale: 1.15;
-  --height: 115px;
-}
-
-.tree-16 {
-  --left: 62%;
-  --scale: 0.95;
-  --height: 95px;
-}
-
-.tree-17 {
+.cloud-5 {
+  --top: 24px;
   --left: 72%;
-  --scale: 1.05;
-  --height: 105px;
-}
-
-.tree-18 {
-  --left: 82%;
-  --scale: 0.85;
-  --height: 85px;
-}
-
-.tree-19 {
-  --left: 92%;
-  --scale: 1.2;
-  --height: 120px;
-}
-
-.tree-20 {
-  --left: 5%;
   --scale: 0.9;
-  --height: 90px;
+  --duration: 64s;
+  --delay: -22s;
+}
+
+.cloud-6 {
+  --top: 84px;
+  --left: 82%;
+  --scale: 0.55;
+  --duration: 78s;
+  --delay: -40s;
 }
 
 /* Responsivo: reduz o tamanho das nuvens em telas menores */
@@ -269,15 +157,5 @@
   .cloud-body {
     transform: scale(0.75);
     transform-origin: bottom center;
-  }
-  
-  .tree-foliage {
-    border-left-width: 30px;
-    border-right-width: 30px;
-    border-bottom-width: 60px;
-  }
-  
-  .tree-trunk {
-    width: 12px;
   }
 }
