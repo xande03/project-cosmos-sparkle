@@ -1,6 +1,6 @@
 import { Tree } from '../components/game/Tree';
 import { Grass } from '../components/game/Grass';
-import { Cloud } from '../components/game/Cloud';
+import { Clouds } from '../components/game/Clouds';
 import { Player } from '../components/game/Player';
 
 export const GameAssets = {
@@ -19,7 +19,7 @@ export const GameAssets = {
     },
   },
   Cloud: {
-    component: Cloud,
+    component: Clouds,
     props: {
       position: { x: 200, y: 50 },
       size: { width: 100, height: 60 },

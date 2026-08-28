@@ -15,10 +15,7 @@ export default function SplashScreen() {
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-
-      
       <div className="text-center relative z-10">
-
         <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">bora jogar</h1>
         <p className="text-xl text-white mb-8">Olá, players</p>
         <Card className="bg-black bg-opacity-30 backdrop-blur-sm border-white border-opacity-20 max-w-md mx-auto">
