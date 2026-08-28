@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { saveSystem, GameSave } from '@/lib/game/save-system';
 import { Button } from '@/components/ui/button';
-import { Save, Trash2, Play, Plus, X, Clock } from 'lucide-react';
+import { Save, Trash2, Play, X, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface SaveManagerProps {
