@@ -1,7 +1,7 @@
-import { Tree } from '@/components/game/Tree';
-import { Grass } from '@/components/game/Grass';
-import { Clouds } from '@/components/game/Clouds';
-import { Player } from '@/components/game/Player';
+import Tree from '@/components/game/Tree';
+import Grass from '@/components/game/Grass';
+import Clouds from '@/components/game/Clouds';
+import Player from '@/components/game/Player';
 
 export const GameAssets = {
   Tree: {
