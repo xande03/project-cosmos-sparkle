@@ -34,7 +34,7 @@ const SplashScreen = () => {
           Cosmos Sparkle
         </h1>
         <p className="text-xl text-white opacity-90 drop-shadow-md">
-          Carregando sua aventura...
+          merecemos jogar um videogame
         </p>
       </div>
     </div>
