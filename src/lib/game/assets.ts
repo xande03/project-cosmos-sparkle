@@ -7,7 +7,7 @@ export const GameAssets = {
   Tree: {
     component: Tree,
     props: {
-      position: { x: 100, y: 300 },
+      position: { x: 100, y: 400 },
       size: { width: 80, height: 120 },
     },
   },

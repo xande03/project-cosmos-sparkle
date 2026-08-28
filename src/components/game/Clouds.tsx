@@ -31,9 +31,9 @@ export default function Clouds() {
       <Cloud className="cloud-5" />
       <Cloud className="cloud-6" />
       <Birds />
-      <Tree className="tree-1" />
-      <Tree className="tree-2" />
-      <Tree className="tree-3" />
+      <Tree className="tree-1" style={{ position: 'absolute', bottom: '0' }} />
+      <Tree className="tree-2" style={{ position: 'absolute', bottom: '0' }} />
+      <Tree className="tree-3" style={{ position: 'absolute', bottom: '0' }} />
     </div>
   )
 }
