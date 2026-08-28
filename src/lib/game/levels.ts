@@ -41,4 +41,20 @@ export const level1: Level = {
     { id: 'c5', position: { x: 1900, y: 500 }, size: { x: 30, y: 30 } },
   ],
   goal: { id: 'goal', position: { x: 2850, y: 470 }, size: { x: 80, y: 80 } },
+  trees: [
+    { id: 't1', position: { x: 100, y: 500 }, size: { x: 60, y: 100 } },
+    { id: 't2', position: { x: 700, y: 500 }, size: { x: 70, y: 120 } },
+    { id: 't3', position: { x: 1200, y: 500 }, size: { x: 80, y: 130 } },
+    { id: 't4', position: { x: 1800, y: 500 }, size: { x: 65, y: 110 } },
+    { id: 't5', position: { x: 2300, y: 500 }, size: { x: 75, y: 125 } },
+    { id: 't6', position: { x: 2800, y: 500 }, size: { x: 85, y: 140 } },
+  ],
+  birds: [
+    { id: 'b1', position: { x: 200, y: 150 }, size: { x: 30, y: 20 }, speed: 2 },
+    { id: 'b2', position: { x: 600, y: 100 }, size: { x: 30, y: 20 }, speed: 3 },
+    { id: 'b3', position: { x: 1000, y: 200 }, size: { x: 30, y: 20 }, speed: 2.5 },
+    { id: 'b4', position: { x: 1500, y: 120 }, size: { x: 30, y: 20 }, speed: 3.5 },
+    { id: 'b5', position: { x: 2200, y: 180 }, size: { x: 30, y: 20 }, speed: 2.8 },
+    { id: 'b6', position: { x: 2700, y: 90 }, size: { x: 30, y: 20 }, speed: 3.2 },
+  ],
 };

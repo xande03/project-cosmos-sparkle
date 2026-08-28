@@ -60,11 +60,16 @@ export default function Clouds() {
       <Bird className="bird-1" />
       <Bird className="bird-2" />
       <Bird className="bird-3" />
+      <Bird className="bird-4" />
+      <Bird className="bird-5" />
       
       {/* Trees */}
       <Tree className="tree-1" />
       <Tree className="tree-2" />
       <Tree className="tree-3" />
+      <Tree className="tree-4" />
+      <Tree className="tree-5" />
+      <Tree className="tree-6" />
     </div>
   )
 }

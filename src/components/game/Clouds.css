@@ -1,112 +1,3 @@
-.clouds {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.cloud {
-  position: absolute;
-  background-color: white;
-  border-radius: 100%;
-  opacity: 0.8;
-}
-
-.cloud-sun {
-  position: absolute;
-  top: 50px;
-  right: 100px;
-  width: 80px;
-  height: 80px;
-  background-color: #FFD700;
-  border-radius: 50%;
-  box-shadow: 0 0 30px #FFD700;
-}
-
-.cloud-1 {
-  top: 80px;
-  left: 20%;
-  width: 100px;
-  height: 40px;
-}
-
-.cloud-2 {
-  top: 120px;
-  left: 60%;
-  width: 80px;
-  height: 35px;
-}
-
-.cloud-3 {
-  top: 60px;
-  left: 40%;
-  width: 120px;
-  height: 45px;
-}
-
-.cloud-4 {
-  top: 150px;
-  left: 10%;
-  width: 90px;
-  height: 30px;
-}
-
-.cloud-5 {
-  top: 100px;
-  left: 75%;
-  width: 110px;
-  height: 40px;
-}
-
-.cloud-6 {
-  top: 180px;
-  left: 30%;
-  width: 70px;
-  height: 25px;
-}
-
-.cloud-body {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.cloud-puff {
-  position: absolute;
-  background-color: white;
-  border-radius: 50%;
-}
-
-.puff-1 {
-  width: 50%;
-  height: 50%;
-  top: -25%;
-  left: 25%;
-}
-
-.puff-2 {
-  width: 60%;
-  height: 60%;
-  top: 0;
-  left: 0;
-}
-
-.puff-3 {
-  width: 60%;
-  height: 60%;
-  top: 0;
-  right: 0;
-}
-
-.cloud-base {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  border-radius: 50%;
-}
-
 /* Bird styles */
 .bird {
   position: absolute;
@@ -220,4 +111,113 @@
 
 .tree-3 {
   left: 75%;
+}
+
+.clouds {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  background-color: white;
+  border-radius: 100%;
+  opacity: 0.8;
+}
+
+.cloud-sun {
+  position: absolute;
+  top: 50px;
+  right: 100px;
+  width: 80px;
+  height: 80px;
+  background-color: #FFD700;
+  border-radius: 50%;
+  box-shadow: 0 0 30px #FFD700;
+}
+
+.cloud-1 {
+  top: 80px;
+  left: 20%;
+  width: 100px;
+  height: 40px;
+}
+
+.cloud-2 {
+  top: 120px;
+  left: 60%;
+  width: 80px;
+  height: 35px;
+}
+
+.cloud-3 {
+  top: 60px;
+  left: 40%;
+  width: 120px;
+  height: 45px;
+}
+
+.cloud-4 {
+  top: 150px;
+  left: 10%;
+  width: 90px;
+  height: 30px;
+}
+
+.cloud-5 {
+  top: 100px;
+  left: 75%;
+  width: 110px;
+  height: 40px;
+}
+
+.cloud-6 {
+  top: 180px;
+  left: 30%;
+  width: 70px;
+  height: 25px;
+}
+
+.cloud-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.cloud-puff {
+  position: absolute;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.puff-1 {
+  width: 50%;
+  height: 50%;
+  top: -25%;
+  left: 25%;
+}
+
+.puff-2 {
+  width: 60%;
+  height: 60%;
+  top: 0;
+  left: 0;
+}
+
+.puff-3 {
+  width: 60%;
+  height: 60%;
+  top: 0;
+  right: 0;
+}
+
+.cloud-base {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  border-radius: 50%;
 }

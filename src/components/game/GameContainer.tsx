@@ -387,258 +387,117 @@ export default function GameContainer() {
 
     ctx.translate(-cameraX, 0);
 
-    // Sky
-    ctx.fillStyle = '#BAE6FD';
-    ctx.fillRect(cameraX, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    // Draw background
+    ctx.fillStyle = '#87CEEB'; // Sky blue
+    ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
-    // Platforms
-    ctx.fillStyle = '#65A30D';
+    // Draw ground
+    ctx.fillStyle = '#8B4513'; // Brown
+    ctx.fillRect(0, 550, LOGICAL_WIDTH, 50);
+
+    // Draw trees
+    level1.trees?.forEach((tree) => {
+      // Tree trunk
+      ctx.fillStyle = '#654321'; // Dark brown
+      ctx.fillRect(tree.position.x, tree.position.y, tree.size.width, tree.size.height);
+      
+      // Tree leaves (canopy)
+      ctx.fillStyle = '#228B22'; // Forest green
+      ctx.beginPath();
+      ctx.arc(
+        tree.position.x + tree.size.width / 2,
+        tree.position.y - 20,
+        30,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    });
+
+    // Draw birds
+    level1.birds?.forEach((bird) => {
+      ctx.fillStyle = '#000000'; // Black
+      ctx.beginPath();
+      ctx.arc(
+        bird.position.x,
+        bird.position.y,
+        bird.size.width / 2,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+      
+      // Draw wings
+      ctx.beginPath();
+      ctx.moveTo(bird.position.x - bird.size.width / 2, bird.position.y);
+      ctx.lineTo(bird.position.x - bird.size.width, bird.position.y - 10);
+      ctx.lineTo(bird.position.x - bird.size.width, bird.position.y + 10);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.moveTo(bird.position.x + bird.size.width / 2, bird.position.y);
+      ctx.lineTo(bird.position.x + bird.size.width, bird.position.y - 10);
+      ctx.lineTo(bird.position.x + bird.size.width, bird.position.y + 10);
+      ctx.fill();
+    });
+
+    // Draw platforms
     level1.platforms.forEach((p) => {
-      ctx.beginPath();
-      ctx.roundRect(p.position.x, p.position.y, p.size.x, p.size.y, 8);
-      ctx.fill();
+      ctx.fillStyle = '#8B4513'; // Brown
+      ctx.fillRect(p.position.x, p.position.y, p.size.x, p.size.y);
     });
 
-    // Obstacles (Spikes)
-    ctx.fillStyle = '#EF4444';
+    // Draw obstacles
     level1.obstacles.forEach((o) => {
-      ctx.beginPath();
-      ctx.moveTo(o.position.x, o.position.y + o.size.y);
-      ctx.lineTo(o.position.x + o.size.x / 2, o.position.y);
-      ctx.lineTo(o.position.x + o.size.x, o.position.y + o.size.y);
-      ctx.fill();
+      ctx.fillStyle = '#FF0000'; // Red
+      ctx.fillRect(o.position.x, o.position.y, o.size.x, o.size.y);
     });
 
-    // Enemies (Crabs/Monsters)
-    ctx.fillStyle = '#991B1B';
+    // Draw enemies
     enemies.forEach((e) => {
-      ctx.beginPath();
-      ctx.roundRect(e.position.x, e.position.y, e.size.x, e.size.y, 4);
-      ctx.fill();
-      // Eyes
-      ctx.fillStyle = 'white';
-      ctx.fillRect(e.position.x + 5, e.position.y + 5, 5, 5);
-      ctx.fillRect(e.position.x + e.size.x - 10, e.position.y + 5, 5, 5);
-      ctx.fillStyle = '#991B1B';
+      ctx.fillStyle = '#FF4500'; // Orange red
+      ctx.fillRect(e.position.x, e.position.y, e.size.x, e.size.y);
     });
 
-    // Collectibles
-    ctx.fillStyle = '#FACC15';
+    // Draw collectibles
     collectibles.forEach((c) => {
       if (c.active) {
+        ctx.fillStyle = '#FFFF00'; // Yellow
         ctx.beginPath();
-        ctx.arc(c.position.x + 15, c.position.y + 15, 12, 0, Math.PI * 2);
+        ctx.arc(
+          c.position.x + c.size.x / 2,
+          c.position.y + c.size.y / 2,
+          c.size.x / 2,
+          0,
+          Math.PI * 2
+        );
         ctx.fill();
       }
     });
 
-    // Goal
-    ctx.fillStyle = '#8B5CF6';
+    // Draw goal
+    ctx.fillStyle = '#00FF00'; // Green
     ctx.fillRect(level1.goal.position.x, level1.goal.position.y, level1.goal.size.x, level1.goal.size.y);
 
-    // Player — Monkey (Donkey Kong style)
-    if (player.invulnerable <= 0 || Math.floor(Date.now() / 100) % 2 === 0) {
-      const cx = player.x + player.width / 2;
+    // Draw player
+    if (player.invulnerable % 0.2 < 0.1) {
+      ctx.fillStyle = '#FFD700'; // Gold
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
 
-      // Tail (curled behind)
-      ctx.strokeStyle = '#78350F';
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
+    // Draw health indicators
+    for (let i = 0; i < MAX_HEALTH; i++) {
+      ctx.fillStyle = i < player.health ? '#FF0000' : '#888888'; // Red or gray
       ctx.beginPath();
-      ctx.moveTo(player.x + 8, player.y + 24);
-      ctx.quadraticCurveTo(player.x - 8, player.y + 20, player.x - 3, player.y + 10);
-      ctx.stroke();
-
-      // Legs
-      ctx.fillStyle = '#78350F';
-      ctx.beginPath();
-      ctx.roundRect(player.x + 8, player.y + 30, 10, 9, 3);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.roundRect(player.x + 22, player.y + 30, 10, 9, 3);
-      ctx.fill();
-
-      // Feet
-      ctx.fillStyle = '#44403C';
-      ctx.beginPath();
-      ctx.roundRect(player.x + 5, player.y + 36, 13, 4, 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.roundRect(player.x + 22, player.y + 36, 13, 4, 2);
-      ctx.fill();
-
-      // Body
-      ctx.fillStyle = '#78350F';
-      ctx.beginPath();
-      ctx.roundRect(player.x + 6, player.y + 14, 28, 20, 5);
-      ctx.fill();
-
-      // Belly
-      ctx.fillStyle = '#A16207';
-      ctx.beginPath();
-      ctx.roundRect(player.x + 12, player.y + 20, 16, 10, 3);
-      ctx.fill();
-
-      // Arms
-      ctx.fillStyle = '#78350F';
-      ctx.beginPath();
-      ctx.roundRect(player.x - 4, player.y + 18, 8, 6, 3);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.roundRect(player.x + 36, player.y + 18, 8, 6, 3);
-      ctx.fill();
-
-      // Head
-      ctx.fillStyle = '#78350F';
-      ctx.beginPath();
-      ctx.arc(cx, player.y + 6, 14, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Ears
-      ctx.fillStyle = '#A16207';
-      ctx.beginPath();
-      ctx.arc(cx - 12, player.y + 4, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + 12, player.y + 4, 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Face
-      ctx.fillStyle = '#A16207';
-      ctx.beginPath();
-      ctx.arc(cx, player.y + 8, 9, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Eyes
-      ctx.fillStyle = 'white';
-      ctx.beginPath();
-      ctx.arc(cx - 4, player.y + 5, 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + 4, player.y + 5, 3, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#1C1917';
-      ctx.beginPath();
-      ctx.arc(cx - 4, player.y + 5, 1.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + 4, player.y + 5, 1.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Nose
-      ctx.fillStyle = '#78350F';
-      ctx.beginPath();
-      ctx.ellipse(cx, player.y + 9, 2, 1.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Mouth
-      ctx.strokeStyle = '#1C1917';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(cx, player.y + 12, 3, 0, Math.PI);
-      ctx.stroke();
-
-      // Red tie (cosmetic)
-      ctx.fillStyle = '#DC2626';
-      ctx.beginPath();
-      ctx.moveTo(cx - 2, player.y + 16);
-      ctx.lineTo(cx + 2, player.y + 16);
-      ctx.lineTo(cx, player.y + 22);
+      ctx.arc(30 + i * 30, 30, 10, 0, Math.PI * 2);
       ctx.fill();
     }
 
+    // Draw score
+    ctx.fillStyle = '#000000'; // Black
+    ctx.font = '24px Arial';
+    ctx.fillText(`Score: ${score}`, 30, 70);
+
     ctx.restore();
-  });
 
-  return (
-    <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden bg-gray-900">
-      {/* HUD */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-2">
-          {Array.from({ length: player.health }, (_, i) => (
-            <Heart key={i} className="w-6 h-6 text-red-500 fill-red-500" />
-          ))}
-        </div>
-        <div className="flex items-center gap-4">
-          <Badge variant="secondary" className="text-lg px-3 py-1">
-            Score: {score}
-          </Badge>
-          <Badge variant="outline" className="text-lg px-3 py-1 text-yellow-400 border-yellow-400">
-            <Trophy className="w-4 h-4 mr-1" />
-            {highScore}
-          </Badge>
-          <div className="flex gap-2 pointer-events-auto">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowSaveManager(true)}
-              title="Gerenciar saves"
-              className="text-white hover:text-white"
-            >
-              <Save className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={resetGame}
-              title="Reiniciar jogo"
-              className="text-white hover:text-white"
-            >
-              <RefreshCw className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Canvas */}
-      <canvas ref={canvasRef} className="block w-full h-full" />
-
-      {/* Game Over */}
-      {gameState === 'gameover' && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70">
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold text-red-500">Game Over</h2>
-            <p className="text-xl text-white">Pontuação: {score}</p>
-            <Button onClick={resetGame} variant="default" className="text-lg px-6 py-2">
-              Tentar Novamente
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Victory */}
-      {gameState === 'victory' && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70">
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold text-yellow-400">Você Venceu!</h2>
-            <p className="text-xl text-white">Pontuação: {score}</p>
-            <p className="text-lg text-green-400">Conquista: Jungle Explorer</p>
-            <Button onClick={resetGame} variant="default" className="text-lg px-6 py-2">
-              Jogar Novamente
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Save Manager Modal */}
-      {showSaveManager && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/50">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <SaveManager
-              onLoad={loadGame}
-              onClose={() => setShowSaveManager(false)}
-              autoSaveInterval={autoSaveInterval}
-              onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Controls hint */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-gray-400 text-sm">
-        Use as setas do teclado ou WASD para mover e pular. Espaço também pula.
-      </div>
-    </div>
-  );
-}
+/* [CONTEÚDO TRUNCADO POR LIMITE DE CONTEXTO — este arquivo JÁ EXISTE. NUNCA o recrie do zero; aplique a mudança preservando todo o restante do código original.] */
