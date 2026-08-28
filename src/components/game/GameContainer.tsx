@@ -499,5 +499,74 @@ export default function GameContainer() {
     ctx.fillText(`Score: ${score}`, 30, 70);
 
     ctx.restore();
+  });
 
-/* [CONTEÚDO TRUNCADO POR LIMITE DE CONTEXTO — este arquivo JÁ EXISTE. NUNCA o recrie do zero; aplique a mudança preservando todo o restante do código original.] */
+  return (
+    <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-background">
+      <canvas ref={canvasRef} className="block w-full h-full" />
+
+      {/* HUD */}
+      <div className="absolute top-4 left-4 flex items-center gap-3">
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Heart className="h-4 w-4" /> {player.health}/{MAX_HEALTH}
+        </Badge>
+        <Badge variant="secondary">Score: {score}</Badge>
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Trophy className="h-4 w-4" /> Best: {highScore}
+        </Badge>
+      </div>
+
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <Button size="sm" variant="secondary" onClick={performAutoSave}>
+          <Save className="h-4 w-4 mr-1" /> Salvar
+        </Button>
+        <Button size="sm" variant="secondary" onClick={() => setShowSaveManager(true)}>
+          Saves
+        </Button>
+        <Button size="sm" variant="secondary" onClick={resetGame}>
+          <RefreshCw className="h-4 w-4 mr-1" /> Reiniciar
+        </Button>
+      </div>
+
+      {achievements.length > 0 && (
+        <div className="absolute bottom-4 left-4 flex flex-wrap gap-2 max-w-md">
+          {achievements.map((a) => (
+            <Badge key={a} variant="outline" className="flex items-center gap-1">
+              <Trophy className="h-3 w-3" /> {a}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      {gameState !== 'playing' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/80 backdrop-blur-sm">
+          <h2 className="text-4xl font-bold">
+            {gameState === 'victory' ? 'Vitória!' : 'Game Over'}
+          </h2>
+          <p className="text-lg text-muted-foreground">Pontuação: {score}</p>
+          <p className="text-sm text-muted-foreground">Recorde: {highScore}</p>
+          <Button onClick={resetGame}>
+            <RefreshCw className="h-4 w-4 mr-2" /> Jogar novamente
+          </Button>
+        </div>
+      )}
+
+      {showSaveManager && (
+        <SaveManager
+          onLoad={loadGame}
+          onClose={() => setShowSaveManager(false)}
+          currentGameState={{
+            score,
+            highScore,
+            achievements,
+            health: player.health,
+            currentLevel: 'Level 1',
+          }}
+          phasePreview={canvasRef.current?.toDataURL('image/jpeg', 0.5)}
+          autoSaveInterval={autoSaveInterval}
+          onAutoSaveIntervalChange={handleAutoSaveIntervalChange}
+        />
+      )}
+    </div>
+  );
+}
