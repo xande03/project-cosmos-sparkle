@@ -12,6 +12,7 @@ export default function Tree({ className }: TreeProps) {
         left: 'var(--left, 10%)',
         transform: 'scale(var(--scale, 1))',
         height: 'var(--height, 100px)',
+        bottom: 'var(--bottom, 0)',
       }}
     >
       <div className="tree-trunk" style={{ height: 'var(--height, 100px)' }} />
