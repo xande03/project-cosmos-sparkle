@@ -16,7 +16,7 @@ export default function SplashScreen() {
     <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
       <div className="absolute inset-0 bg-black">
         <img 
-          src="/images/logo-npontes.png" 
+          src="/images/efeitonpontes.PNG" 
           alt="N.PONTES" 
           className="w-full h-full object-contain p-12"
         />
